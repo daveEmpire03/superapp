@@ -1,23 +1,40 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../domain/entities/cart_entity.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/cart_repository.dart';
-import 'cart_event.dart';
-import 'cart_state.dart';
+import '../bloc/cart_event.dart';
+import '../bloc/cart_state.dart';
+import '../../domain/entities/cart_entity.dart';
 
-class CartBloc extends Bloc<CartEvent, CartState> {
-  final CartRepository cartRepository;
+typedef Emitter<T> = void Function(T value);
 
-  CartBloc({
-    required this.cartRepository,
-  }) : super(const CartInitial()) {
-    on<LoadCartEvent>(_onLoadCart);
-    on<AddToCartEvent>(_onAddToCart);
-    on<ConfirmStoreChangeEvent>(_onConfirmStoreChange);
-    on<CancelStoreChangeEvent>(_onCancelStoreChange);
-    on<UpdateCartQuantityEvent>(_onUpdateCartQuantity);
-    on<RemoveFromCartEvent>(_onRemoveFromCart);
-    on<ClearCartEvent>(_onClearCart);
+final cartStateProvider = NotifierProvider<CartController, CartState>(
+  CartController.new,
+);
+
+class CartController extends Notifier<CartState> {
+  CartRepository get cartRepository => ref.read(cartRepositoryProvider);
+
+  @override
+  CartState build() => const CartInitial();
+
+  void _emit(CartState value) { state = value; }
+
+  Future<void> add(CartEvent event) async {
+    if (event is LoadCartEvent) {
+      await _onLoadCart(event, _emit);
+    }     else if (event is AddToCartEvent) {
+      await _onAddToCart(event, _emit);
+    }     else if (event is ConfirmStoreChangeEvent) {
+      await _onConfirmStoreChange(event, _emit);
+    }     else if (event is CancelStoreChangeEvent) {
+      await _onCancelStoreChange(event, _emit);
+    }     else if (event is UpdateCartQuantityEvent) {
+      await _onUpdateCartQuantity(event, _emit);
+    }     else if (event is RemoveFromCartEvent) {
+      await _onRemoveFromCart(event, _emit);
+    }     else if (event is ClearCartEvent) {
+      await _onClearCart(event, _emit);
+    }
   }
 
   Future<void> _onLoadCart(

@@ -1,55 +1,46 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/error/exceptions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/auth_repository.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
+import '../../../../core/error/exceptions.dart';
 
-class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
+typedef Emitter<T> = void Function(T value);
 
-  AuthBloc({
-    required this.authRepository,
-  }) : super(const AuthInitial()) {
-    on<CheckAuthStatusEvent>(
-      _onCheckAuthStatus,
-    );
+final authStateProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);
 
-    on<SignInSubmittedEvent>(
-      _onSignInSubmitted,
-    );
+class AuthController extends Notifier<AuthState> {
+  AuthRepository get authRepository => ref.read(authRepositoryProvider);
 
-    on<RegisterSubmittedEvent>(
-      _onRegisterSubmitted,
-    );
+  @override
+  AuthState build() => const AuthInitial();
 
-    on<VerifyEmailSubmittedEvent>(
-      _onVerifyEmailSubmitted,
-    );
+  void _emit(AuthState value) { state = value; }
 
-    on<ResendEmailVerificationEvent>(
-      _onResendEmailVerification,
-    );
-
-    on<ForgotPasswordSubmittedEvent>(
-      _onForgotPasswordSubmitted,
-    );
-
-    on<VerifyPasswordResetCodeSubmittedEvent>(
-      _onVerifyPasswordResetCodeSubmitted,
-    );
-
-    on<ResetPasswordSubmittedEvent>(
-      _onResetPasswordSubmitted,
-    );
-
-    on<ChangePasswordSubmittedEvent>(
-      _onChangePasswordSubmitted,
-    );
-
-    on<SignOutEvent>(
-      _onSignOut,
-    );
+  Future<void> add(AuthEvent event) async {
+    if (event is CheckAuthStatusEvent) {
+      await _onCheckAuthStatus(event, _emit);
+    }     else if (event is SignInSubmittedEvent) {
+      await _onSignInSubmitted(event, _emit);
+    }     else if (event is RegisterSubmittedEvent) {
+      await _onRegisterSubmitted(event, _emit);
+    }     else if (event is VerifyEmailSubmittedEvent) {
+      await _onVerifyEmailSubmitted(event, _emit);
+    }     else if (event is ResendEmailVerificationEvent) {
+      await _onResendEmailVerification(event, _emit);
+    }     else if (event is ForgotPasswordSubmittedEvent) {
+      await _onForgotPasswordSubmitted(event, _emit);
+    }     else if (event is VerifyPasswordResetCodeSubmittedEvent) {
+      await _onVerifyPasswordResetCodeSubmitted(event, _emit);
+    }     else if (event is ResetPasswordSubmittedEvent) {
+      await _onResetPasswordSubmitted(event, _emit);
+    }     else if (event is ChangePasswordSubmittedEvent) {
+      await _onChangePasswordSubmitted(event, _emit);
+    }     else if (event is SignOutEvent) {
+      await _onSignOut(event, _emit);
+    }
   }
 
   Future<void> _onCheckAuthStatus(

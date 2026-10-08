@@ -1,10 +1,10 @@
 name: bokku_mart
-description: "Bokku Mart - Nigeria's favorite supermarket & grocery mobile app built with Clean Architecture, GoRouter, Dio, and flutter_bloc."
+description: "Bokku Mart - Nigeria's favorite supermarket & grocery mobile app built with Riverpod Clean Architecture, GoRouter, and Dio."
 publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ">=3.12.0 <4.0.0"
   flutter: ">=3.16.0"
 
 dependencies:
@@ -12,8 +12,7 @@ dependencies:
     sdk: flutter
 
   # Architecture & State Management
-  flutter_bloc: ^8.1.6
-  bloc: ^8.1.4
+  flutter_riverpod: ^3.4.3
   equatable: ^2.0.5
   get_it: ^7.7.0
 
@@ -44,7 +43,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  bloc_test: ^9.1.7
   mocktail: ^1.0.4
 
 flutter:

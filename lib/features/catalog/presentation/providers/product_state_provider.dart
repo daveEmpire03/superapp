@@ -1,35 +1,36 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/error/exceptions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/product_repository.dart';
-import 'product_event.dart';
-import 'product_state.dart';
+import '../bloc/product_event.dart';
+import '../bloc/product_state.dart';
+import '../../../../core/error/exceptions.dart';
 
-class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  final ProductRepository productRepository;
+typedef Emitter<T> = void Function(T value);
 
+final productStateProvider = NotifierProvider<ProductController, ProductState>(
+  ProductController.new,
+);
+
+class ProductController extends Notifier<ProductState> {
+  ProductRepository get productRepository => ref.read(productRepositoryProvider);
   String? _selectedStoreId;
-
   String? get selectedStoreId => _selectedStoreId;
 
-  ProductBloc({
-    required this.productRepository,
-  }) : super(const ProductInitial()) {
-    on<LoadCatalogEvent>(
-      _onLoadCatalog,
-    );
+  @override
+  ProductState build() => const ProductInitial();
 
-    on<FilterByCategoryEvent>(
-      _onFilterByCategory,
-    );
+  void _emit(ProductState value) { state = value; }
 
-    on<SearchProductsEvent>(
-      _onSearchProducts,
-    );
-
-    on<ClearSearchEvent>(
-      _onClearSearch,
-    );
+  Future<void> add(ProductEvent event) async {
+    if (event is LoadCatalogEvent) {
+      await _onLoadCatalog(event, _emit);
+    }     else if (event is FilterByCategoryEvent) {
+      await _onFilterByCategory(event, _emit);
+    }     else if (event is SearchProductsEvent) {
+      await _onSearchProducts(event, _emit);
+    }     else if (event is ClearSearchEvent) {
+      _onClearSearch(event, _emit);
+    }
   }
 
   Future<void> _onLoadCatalog(

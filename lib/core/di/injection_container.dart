@@ -11,31 +11,26 @@ import '../storage/auth_token_storage.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 // Catalog
 import '../../features/catalog/data/datasources/product_remote_data_source.dart';
 import '../../features/catalog/data/repositories/product_repository_impl.dart';
 import '../../features/catalog/domain/repositories/product_repository.dart';
-import '../../features/catalog/presentation/bloc/product_bloc.dart';
 
 // Cart
 import '../../features/cart/data/repositories/cart_repository_impl.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
-import '../../features/cart/presentation/bloc/cart_bloc.dart';
 
 // Checkout
 import '../../features/checkout/data/datasources/order_remote_data_source.dart';
 import '../../features/checkout/data/repositories/order_repository_impl.dart';
 import '../../features/checkout/domain/repositories/order_repository.dart';
-import '../../features/checkout/presentation/bloc/checkout_bloc.dart';
 
 // Stores
 import '../../features/stores/data/datasources/store_local_data_source.dart';
 import '../../features/stores/data/datasources/store_remote_data_source.dart';
 import '../../features/stores/data/repositories/store_repository.dart';
 import '../../features/stores/data/repositories/store_repository_impl.dart';
-import '../../features/stores/presentation/bloc/store_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -80,11 +75,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  sl.registerFactory<AuthBloc>(
-    () => AuthBloc(
-      authRepository: sl<AuthRepository>(),
-    ),
-  );
 
   // Catalog
   sl.registerLazySingleton<ProductRemoteDataSource>(
@@ -99,11 +89,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  sl.registerFactory<ProductBloc>(
-    () => ProductBloc(
-      productRepository: sl<ProductRepository>(),
-    ),
-  );
 
   // Cart
   sl.registerLazySingleton<CartRemoteDataSource>(
@@ -118,11 +103,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  sl.registerFactory<CartBloc>(
-    () => CartBloc(
-      cartRepository: sl<CartRepository>(),
-    ),
-  );
 
   // Checkout
   sl.registerLazySingleton<OrderRemoteDataSource>(
@@ -137,11 +117,6 @@ Future<void> initDependencies() async {
     ),
   );
 
-  sl.registerFactory<CheckoutBloc>(
-    () => CheckoutBloc(
-      orderRepository: sl<OrderRepository>(),
-    ),
-  );
 
   // Stores
   sl.registerLazySingleton<StoreRemoteDataSource>(
@@ -163,10 +138,4 @@ Future<void> initDependencies() async {
     ),
   );
 
-  sl.registerFactory<StoreBloc>(
-    () => StoreBloc(
-      storeRepository: sl<StoreRepository>(),
-      locationService: sl<LocationService>(),
-    ),
-  );
 }

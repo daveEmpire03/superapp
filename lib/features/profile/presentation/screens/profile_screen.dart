@@ -1,10 +1,11 @@
+import 'package:bokku_mart/features/auth/presentation/providers/auth_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 
@@ -15,7 +16,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
+    return RiverpodListener<AuthState>(
+      provider: authStateProvider,
       listener: (context, state) {
         if (state is Unauthenticated) {
           context.goNamed(
@@ -40,7 +42,8 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        body: BlocBuilder<AuthBloc, AuthState>(
+        body: RiverpodBuilder<AuthState>(
+      provider: authStateProvider,
           builder: (context, state) {
             if (state is AuthLoading) {
               return const Center(
@@ -73,7 +76,7 @@ class ProfileScreen extends StatelessWidget {
             return RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
-                context.read<AuthBloc>().add(
+                ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
                       const CheckAuthStatusEvent(),
                     );
               },
@@ -352,7 +355,7 @@ class ProfileScreen extends StatelessWidget {
       return;
     }
 
-    context.read<AuthBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
           const SignOutEvent(),
         );
   }

@@ -1,41 +1,40 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/repository_providers.dart';
+import '../../data/repositories/store_repository.dart';
+import '../bloc/store_event.dart';
+import '../bloc/store_state.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/location/location_service.dart';
-import '../../data/repositories/store_repository.dart';
 import '../../domain/entities/store_entity.dart';
-import 'store_event.dart';
-import 'store_state.dart';
 
-class StoreBloc extends Bloc<StoreEvent, StoreState> {
-  final StoreRepository storeRepository;
-  final LocationService locationService;
+typedef Emitter<T> = void Function(T value);
 
+final storeStateProvider = NotifierProvider<StoreController, StoreState>(
+  StoreController.new,
+);
+
+class StoreController extends Notifier<StoreState> {
+  StoreRepository get storeRepository => ref.read(storeRepositoryProvider);
+  LocationService get locationService => ref.read(locationServiceProvider);
   StoreEntity? _selectedStore;
-
-  // Coordinates remain in memory only.
   double? _currentLatitude;
   double? _currentLongitude;
 
-  StoreBloc({
-    required this.storeRepository,
-    required this.locationService,
-  }) : super(const StoreInitial()) {
-    on<LoadStoresEvent>(
-      _onLoadStores,
-    );
+  @override
+  StoreState build() => const StoreInitial();
 
-    on<LoadStoresWithLocationEvent>(
-      _onLoadStoresWithLocation,
-    );
+  void _emit(StoreState value) { state = value; }
 
-    on<SearchStoresEvent>(
-      _onSearchStores,
-    );
-
-    on<SelectStoreEvent>(
-      _onSelectStore,
-    );
+  Future<void> add(StoreEvent event) async {
+    if (event is LoadStoresEvent) {
+      await _onLoadStores(event, _emit);
+    }     else if (event is LoadStoresWithLocationEvent) {
+      await _onLoadStoresWithLocation(event, _emit);
+    }     else if (event is SearchStoresEvent) {
+      await _onSearchStores(event, _emit);
+    }     else if (event is SelectStoreEvent) {
+      await _onSelectStore(event, _emit);
+    }
   }
 
   Future<void> _onLoadStores(

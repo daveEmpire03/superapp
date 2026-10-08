@@ -1,13 +1,14 @@
+import 'package:bokku_mart/features/checkout/presentation/providers/checkout_state_provider.dart';
+import 'package:bokku_mart/features/cart/presentation/providers/cart_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
-import '../bloc/checkout_bloc.dart';
 import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 
@@ -22,16 +23,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<CheckoutBloc>().add(LoadCheckoutInitialDataEvent());
+    ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(LoadCheckoutInitialDataEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CheckoutBloc, CheckoutState>(
+    return RiverpodListener<CheckoutState>(
+      provider: checkoutStateProvider,
       listener: (context, state) {
         if (state is CheckoutOrderPlacedSuccess) {
           // Clear cart on successful order placement
-          context.read<CartBloc>().add(const ClearCartEvent());
+          ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(const ClearCartEvent());
           context.goNamed(
             RouteNames.orderSuccess,
             extra: state.order,
@@ -50,13 +52,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           title: const Text('Checkout',
               style: TextStyle(fontWeight: FontWeight.w800)),
         ),
-        body: BlocBuilder<CartBloc, CartState>(
+        body: RiverpodBuilder<CartState>(
+      provider: cartStateProvider,
           builder: (context, cartState) {
             if (cartState is! CartLoaded || cartState.items.isEmpty) {
               return const Center(child: Text('No items in basket'));
             }
 
-            return BlocBuilder<CheckoutBloc, CheckoutState>(
+            return RiverpodBuilder<CheckoutState>(
+      provider: checkoutStateProvider,
               builder: (context, checkoutState) {
                 if (checkoutState is CheckoutLoading) {
                   return const Center(
@@ -96,7 +100,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        context.read<CheckoutBloc>().add(
+                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
                                             const SelectDeliveryMethodEvent(
                                                 'delivery'));
                                       },
@@ -151,7 +155,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        context.read<CheckoutBloc>().add(
+                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
                                             const SelectDeliveryMethodEvent(
                                                 'pickup'));
                                       },
@@ -248,8 +252,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedAddress?.id,
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectAddressEvent(addr));
                                     },
                                     title: Text(
@@ -290,8 +293,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     groupValue: checkoutState.selectedStore?.id,
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPickupStoreEvent(store));
                                     },
                                     title: Text(store.name,
@@ -330,8 +332,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
@@ -350,8 +351,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
@@ -370,8 +370,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
@@ -437,7 +436,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 onPressed: checkoutState.isSubmitting
                                     ? null
                                     : () {
-                                        context.read<CheckoutBloc>().add(
+                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
                                               SubmitPlaceOrderEvent(
                                                 items: cartState.items,
                                                 subtotal: cartState.subtotal,

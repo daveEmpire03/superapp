@@ -1,18 +1,38 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/order_repository.dart';
-import 'checkout_event.dart';
-import 'checkout_state.dart';
+import '../bloc/checkout_event.dart';
+import '../bloc/checkout_state.dart';
 
-class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
-  final OrderRepository orderRepository;
 
-  CheckoutBloc({required this.orderRepository}) : super(CheckoutInitial()) {
-    on<LoadCheckoutInitialDataEvent>(_onLoadInitialData);
-    on<SelectDeliveryMethodEvent>(_onSelectDeliveryMethod);
-    on<SelectAddressEvent>(_onSelectAddress);
-    on<SelectPickupStoreEvent>(_onSelectPickupStore);
-    on<SelectPaymentMethodEvent>(_onSelectPaymentMethod);
-    on<SubmitPlaceOrderEvent>(_onSubmitPlaceOrder);
+typedef Emitter<T> = void Function(T value);
+
+final checkoutStateProvider = NotifierProvider<CheckoutController, CheckoutState>(
+  CheckoutController.new,
+);
+
+class CheckoutController extends Notifier<CheckoutState> {
+  OrderRepository get orderRepository => ref.read(orderRepositoryProvider);
+
+  @override
+  CheckoutState build() => CheckoutInitial();
+
+  void _emit(CheckoutState value) { state = value; }
+
+  Future<void> add(CheckoutEvent event) async {
+    if (event is LoadCheckoutInitialDataEvent) {
+      await _onLoadInitialData(event, _emit);
+    }     else if (event is SelectDeliveryMethodEvent) {
+      _onSelectDeliveryMethod(event, _emit);
+    }     else if (event is SelectAddressEvent) {
+      _onSelectAddress(event, _emit);
+    }     else if (event is SelectPickupStoreEvent) {
+      _onSelectPickupStore(event, _emit);
+    }     else if (event is SelectPaymentMethodEvent) {
+      _onSelectPaymentMethod(event, _emit);
+    }     else if (event is SubmitPlaceOrderEvent) {
+      await _onSubmitPlaceOrder(event, _emit);
+    }
   }
 
   Future<void> _onLoadInitialData(

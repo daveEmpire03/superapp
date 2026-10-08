@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/riverpod_ui.dart';
+import '../providers/auth_state_provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
@@ -55,7 +56,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    context.read<AuthBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
           ForgotPasswordSubmittedEvent(
             email: _emailController.text.trim(),
           ),
@@ -78,7 +79,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
+    return RiverpodConsumer<AuthState>(
+      provider: authStateProvider,
       listener: (
         context,
         state,

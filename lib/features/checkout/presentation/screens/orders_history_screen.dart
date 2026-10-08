@@ -1,10 +1,11 @@
+import 'package:bokku_mart/features/checkout/presentation/providers/checkout_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/checkout_bloc.dart';
 import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 
@@ -19,7 +20,7 @@ class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<CheckoutBloc>().add(LoadCheckoutInitialDataEvent());
+    ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(LoadCheckoutInitialDataEvent());
   }
 
   @override
@@ -30,7 +31,8 @@ class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
         title: const Text('My Supermarket Orders',
             style: TextStyle(fontWeight: FontWeight.w800)),
       ),
-      body: BlocBuilder<CheckoutBloc, CheckoutState>(
+      body: RiverpodBuilder<CheckoutState>(
+      provider: checkoutStateProvider,
         builder: (context, state) {
           // Predefined realistic past order list
           final orders = [

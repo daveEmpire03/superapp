@@ -1,8 +1,8 @@
-import 'package:bokku_mart/features/catalog/presentation/bloc/product_bloc.dart';
+import 'package:bokku_mart/features/catalog/presentation/providers/product_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_state.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/product_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class DealsScreen extends StatelessWidget {
@@ -16,7 +16,8 @@ class DealsScreen extends StatelessWidget {
         title: const Text('Exclusive Deals 🔥',
             style: TextStyle(fontWeight: FontWeight.w800)),
       ),
-      body: BlocBuilder<ProductBloc, ProductState>(
+      body: RiverpodBuilder<ProductState>(
+      provider: productStateProvider,
         builder: (context, state) {
           if (state is! ProductLoaded) {
             return const Center(
