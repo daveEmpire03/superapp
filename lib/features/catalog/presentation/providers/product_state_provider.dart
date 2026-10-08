@@ -29,7 +29,7 @@ class ProductController extends Notifier<ProductState> {
     }     else if (event is SearchProductsEvent) {
       await _onSearchProducts(event, _emit);
     }     else if (event is ClearSearchEvent) {
-      await _onClearSearch(event, _emit);
+      _onClearSearch(event, _emit);
     }
   }
 
