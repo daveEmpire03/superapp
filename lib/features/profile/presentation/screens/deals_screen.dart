@@ -3,7 +3,6 @@ import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_state.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/product_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class DealsScreen extends StatelessWidget {
