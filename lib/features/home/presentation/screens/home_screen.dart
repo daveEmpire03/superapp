@@ -1,13 +1,14 @@
-import 'package:bokku_mart/features/catalog/presentation/bloc/product_bloc.dart';
+import 'package:bokku_mart/features/stores/presentation/providers/store_state_provider.dart';
+import 'package:bokku_mart/features/catalog/presentation/providers/product_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_event.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_state.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/category_chip.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/product_card.dart';
-import 'package:bokku_mart/features/stores/presentation/bloc/store_bloc.dart';
 import 'package:bokku_mart/features/stores/presentation/bloc/store_state.dart';
 import 'package:bokku_mart/features/stores/presentation/widgets/store_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/animations.dart';
@@ -22,7 +23,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<StoreBloc, StoreState>(
+    return RiverpodListener<StoreState>(
+      provider: storeStateProvider,
       listenWhen: (previous, current) {
         if (current is! StoreLoaded) {
           return false;
@@ -57,7 +59,7 @@ class HomeScreen extends StatelessWidget {
           return;
         }
 
-        final productBloc = context.read<ProductBloc>();
+        final productBloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
         if (productBloc.selectedStoreId == storeId) {
           return;
@@ -75,7 +77,7 @@ class HomeScreen extends StatelessWidget {
           child: RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () async {
-              final storeState = context.read<StoreBloc>().state;
+              final storeState = ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).state;
 
               String? storeId;
 
@@ -85,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                 storeId = storeState.selectedStore?.id;
               }
 
-              final productBloc = context.read<ProductBloc>();
+              final productBloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
               productBloc.add(
                 LoadCatalogEvent(
@@ -181,7 +183,8 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(
                             height: 8,
                           ),
-                          BlocBuilder<StoreBloc, StoreState>(
+                          RiverpodBuilder<StoreState>(
+      provider: storeStateProvider,
                             builder: (context, state) {
                               final hasStore = state is StoreLoaded &&
                                   state.selectedStore?.id != null;
@@ -288,7 +291,8 @@ class HomeScreen extends StatelessWidget {
                 // Categories
                 // -----------------------------------------------------------
 
-                BlocBuilder<ProductBloc, ProductState>(
+                RiverpodBuilder<ProductState>(
+      provider: productStateProvider,
                   builder: (context, state) {
                     if (state is! ProductLoaded || state.categories.isEmpty) {
                       return const SliverToBoxAdapter(
@@ -365,7 +369,7 @@ class HomeScreen extends StatelessWidget {
                                     isSelected:
                                         state.selectedCategory == category.id,
                                     onTap: () {
-                                      context.read<ProductBloc>().add(
+                                      ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier).add(
                                             FilterByCategoryEvent(
                                               category.id,
                                             ),
@@ -386,7 +390,8 @@ class HomeScreen extends StatelessWidget {
                 // Deals
                 // -----------------------------------------------------------
 
-                BlocBuilder<ProductBloc, ProductState>(
+                RiverpodBuilder<ProductState>(
+      provider: productStateProvider,
                   builder: (context, state) {
                     if (state is! ProductLoaded || state.deals.isEmpty) {
                       return const SliverToBoxAdapter(
@@ -484,7 +489,8 @@ class HomeScreen extends StatelessWidget {
                 // Products
                 // -----------------------------------------------------------
 
-                BlocBuilder<ProductBloc, ProductState>(
+                RiverpodBuilder<ProductState>(
+      provider: productStateProvider,
                   builder: (context, state) {
                     if (state is ProductLoading) {
                       return const SliverFillRemaining(
@@ -503,7 +509,7 @@ class HomeScreen extends StatelessWidget {
                         child: _CatalogError(
                           message: state.message,
                           onRetry: () {
-                            final bloc = context.read<ProductBloc>();
+                            final bloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
                             bloc.add(
                               LoadCatalogEvent(
