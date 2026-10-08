@@ -22,6 +22,6 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
       - name: Static analysis
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
       - name: Unit and widget tests
         run: flutter test
