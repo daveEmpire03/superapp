@@ -1,7 +1,8 @@
+import 'package:bokku_mart/features/catalog/presentation/providers/product_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
 import '../widgets/product_card.dart';
@@ -18,7 +19,8 @@ class CategoriesScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      body: BlocBuilder<ProductBloc, ProductState>(
+      body: RiverpodBuilder<ProductState>(
+      provider: productStateProvider,
         builder: (context, state) {
           if (state is! ProductLoaded) {
             return const Center(
@@ -111,7 +113,7 @@ class CategoriesScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               ElevatedButton(
                                 onPressed: () {
-                                  context.read<ProductBloc>().add(
+                                  ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier).add(
                                       const FilterByCategoryEvent('groceries'));
                                 },
                                 child: const Text('View Groceries'),
