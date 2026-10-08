@@ -45,8 +45,7 @@ class CategoriesScreen extends StatelessWidget {
 
                     return InkWell(
                       onTap: () {
-                        context
-                            .read<ProductBloc>()
+                        ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier)
                             .add(FilterByCategoryEvent(cat.id));
                       },
                       child: Container(
