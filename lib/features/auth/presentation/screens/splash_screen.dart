@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/riverpod_ui.dart';
+import '../providers/auth_state_provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
@@ -26,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    context.read<AuthBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
           const CheckAuthStatusEvent(),
         );
   }
@@ -53,7 +54,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
+    return RiverpodListener<AuthState>(
+      provider: authStateProvider,
       listener: (context, state) {
         if (state is Authenticated) {
           _navigate(RouteNames.home);
