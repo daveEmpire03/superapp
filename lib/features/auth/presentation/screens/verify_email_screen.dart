@@ -1,14 +1,15 @@
+import 'package:bokku_mart/features/auth/presentation/providers/auth_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
@@ -116,7 +117,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       return;
     }
 
-    context.read<AuthBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
           VerifyEmailSubmittedEvent(
             email: _email,
             code: code,
@@ -131,7 +132,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     FocusScope.of(context).unfocus();
 
-    context.read<AuthBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
           ResendEmailVerificationEvent(
             email: _email,
           ),
@@ -182,7 +183,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       return const _MissingEmailScreen();
     }
 
-    return BlocConsumer<AuthBloc, AuthState>(
+    return RiverpodConsumer<AuthState>(
+      provider: authStateProvider,
       listener: (context, state) {
         if (state is Authenticated) {
           context.goNamed(
