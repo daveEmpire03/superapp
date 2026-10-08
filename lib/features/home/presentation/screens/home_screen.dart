@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
           child: RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () async {
-              final storeState = ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).state;
+              final storeState = ProviderScope.containerOf(context, listen: false).read(storeStateProvider);
 
               String? storeId;
 
@@ -89,14 +89,10 @@ class HomeScreen extends StatelessWidget {
 
               final productBloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
-              productBloc.add(
+              await productBloc.add(
                 LoadCatalogEvent(
                   storeId: storeId ?? productBloc.selectedStoreId,
                 ),
-              );
-
-              await productBloc.stream.firstWhere(
-                (state) => state is ProductLoaded || state is ProductError,
               );
             },
             child: CustomScrollView(
