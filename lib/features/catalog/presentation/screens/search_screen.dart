@@ -58,8 +58,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       icon: const Icon(Icons.clear, size: 18),
                       onPressed: () {
                         _searchController.clear();
-                        context
-                            .read<ProductBloc>()
+                        ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier)
                             .add(const ClearSearchEvent());
                         setState(() {});
                       },
