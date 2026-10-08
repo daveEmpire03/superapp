@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/riverpod_ui.dart';
 import '../providers/auth_state_provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,25 +10,25 @@ import '../../../../core/router/route_names.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({
     super.key,
   });
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
-
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          const CheckAuthStatusEvent(),
-        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(authStateProvider.notifier).add(const CheckAuthStatusEvent());
+    });
   }
 
   Future<void> _navigate(
@@ -54,24 +53,27 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RiverpodListener<AuthState>(
-      provider: authStateProvider,
-      listener: (context, state) {
-        if (state is Authenticated) {
-          _navigate(RouteNames.home);
-          return;
-        }
+    ref.listen<AuthState>(authStateProvider, (previous, current) {
+      if (current is Authenticated) {
+        _navigate(RouteNames.home);
+      } else if (current is Unauthenticated || current is AuthError) {
+        _navigate(RouteNames.signIn);
+      }
+    });
 
-        if (state is Unauthenticated) {
-          _navigate(RouteNames.signIn);
-          return;
-        }
+    final authState = ref.watch(authStateProvider);
+    if (!_hasNavigated &&
+        (authState is Authenticated ||
+            authState is Unauthenticated ||
+            authState is AuthError)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _hasNavigated) return;
+        _navigate(authState is Authenticated ? RouteNames.home : RouteNames.signIn);
+      });
+    }
 
-        if (state is AuthError) {
-          _navigate(RouteNames.signIn);
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
+
         body: Container(
           width: double.infinity,
           height: double.infinity,
@@ -191,7 +193,6 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 }
