@@ -1,10 +1,11 @@
+import 'package:bokku_mart/features/stores/presentation/providers/store_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/store_entity.dart';
-import '../bloc/store_bloc.dart';
 import '../bloc/store_event.dart';
 import '../bloc/store_state.dart';
 
@@ -13,7 +14,8 @@ class StoreSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<StoreBloc, StoreState>(
+    return RiverpodBuilder<StoreState>(
+      provider: storeStateProvider,
       builder: (context, state) {
         if (state is StoreLoading) {
           return const SizedBox(
@@ -64,12 +66,7 @@ class StoreSelector extends StatelessWidget {
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) {
-        return BlocProvider.value(
-          value: context.read<StoreBloc>(),
-          child: _StoreBottomSheet(
-            initialState: state,
-          ),
-        );
+        return _StoreBottomSheet(initialState: state);
       },
     );
   }
@@ -175,13 +172,13 @@ class _StoreBottomSheetState extends State<_StoreBottomSheet> {
   }
 
   void _findStoresNearMe() {
-    context.read<StoreBloc>().add(
+    ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
           const LoadStoresWithLocationEvent(),
         );
   }
 
   void _search(String value) {
-    final bloc = context.read<StoreBloc>();
+    final bloc = ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier);
     final query = value.trim();
 
     if (query.isEmpty) {
@@ -312,7 +309,8 @@ class _StoreBottomSheetState extends State<_StoreBottomSheet> {
               ),
             ),
           ),
-          BlocBuilder<StoreBloc, StoreState>(
+          RiverpodBuilder<StoreState>(
+      provider: storeStateProvider,
             builder: (context, state) {
               final isLocating = state is StoreLocationLoading;
 
@@ -349,7 +347,8 @@ class _StoreBottomSheetState extends State<_StoreBottomSheet> {
             },
           ),
           Expanded(
-            child: BlocBuilder<StoreBloc, StoreState>(
+            child: RiverpodBuilder<StoreState>(
+      provider: storeStateProvider,
               builder: (context, state) {
                 if (state is StoreLocationLoading) {
                   if (state.stores.isEmpty) {
@@ -644,7 +643,7 @@ class _StoreTile extends StatelessWidget {
               Icons.chevron_right,
             ),
       onTap: () {
-        context.read<StoreBloc>().add(
+        ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
               SelectStoreEvent(
                 store.id,
               ),
@@ -683,7 +682,7 @@ class _StoreError extends StatelessWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () {
-                context.read<StoreBloc>().add(
+                ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
                       const LoadStoresEvent(),
                     );
               },
