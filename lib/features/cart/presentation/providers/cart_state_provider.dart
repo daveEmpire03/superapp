@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
+import '../../domain/repositories/cart_repository.dart';
 import '../bloc/cart_event.dart';
 import '../bloc/cart_state.dart';
 import '../../domain/entities/cart_entity.dart';
