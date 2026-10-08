@@ -1,10 +1,11 @@
+import 'package:bokku_mart/features/cart/presentation/providers/cart_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
 
 class MainShellScreen extends StatelessWidget {
@@ -114,7 +115,8 @@ class _BottomNavigation extends StatelessWidget {
               label: AppStrings.navDeals,
             ),
             BottomNavigationBarItem(
-              icon: BlocBuilder<CartBloc, CartState>(
+              icon: RiverpodBuilder<CartState>(
+      provider: cartStateProvider,
                 buildWhen: (
                   previous,
                   current,
