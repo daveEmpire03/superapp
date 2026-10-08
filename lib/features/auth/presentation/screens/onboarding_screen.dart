@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 
@@ -73,10 +74,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _OnboardingHeader(
-              currentPage: _currentPage,
-              pageCount: _pages.length,
-              onSkip: _skipOnboarding,
+            AppSlideIn(
+              direction: SlideDirection.fromTop,
+              duration: const Duration(milliseconds: 350),
+              distance: 0.1,
+              child: _OnboardingHeader(
+                currentPage: _currentPage,
+                pageCount: _pages.length,
+                onSkip: _skipOnboarding,
+              ),
             ),
             Expanded(
               child: PageView.builder(
@@ -90,17 +96,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 },
                 itemBuilder: (context, index) {
                   return _OnboardingPage(
+                    key: ValueKey<int>(index),
                     data: _pages[index],
                     pageIndex: index,
                   );
                 },
               ),
             ),
-            _BottomSection(
-              currentPage: _currentPage,
-              pageCount: _pages.length,
-              isLastPage: _isLastPage,
-              onPressed: _nextPage,
+            AppSlideIn(
+              direction: SlideDirection.fromBottom,
+              duration: const Duration(milliseconds: 350),
+              distance: 0.08,
+              child: _BottomSection(
+                currentPage: _currentPage,
+                pageCount: _pages.length,
+                isLastPage: _isLastPage,
+                onPressed: _nextPage,
+              ),
             ),
           ],
         ),
@@ -169,24 +181,31 @@ class _OnboardingHeader extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          if (currentPage < pageCount - 1)
-            TextButton(
-              onPressed: onSkip,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+          AnimatedOpacity(
+            opacity: currentPage < pageCount - 1 ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: IgnorePointer(
+              ignoring: currentPage >= pageCount - 1,
+              child: TextButton(
+                onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Skip',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                child: const Text(
+                  'Skip',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -195,6 +214,7 @@ class _OnboardingHeader extends StatelessWidget {
 
 class _OnboardingPage extends StatelessWidget {
   const _OnboardingPage({
+    super.key,
     required this.data,
     required this.pageIndex,
   });
@@ -231,31 +251,38 @@ class _OnboardingPage extends StatelessWidget {
             constraints: const BoxConstraints(
               maxWidth: 420,
             ),
-            child: Column(
-              children: [
-                Text(
-                  data.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: screenHeight < 700 ? 27 : 31,
-                    height: 1.15,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.8,
+            child: AppSlideIn(
+              delay: const Duration(milliseconds: 90),
+              duration: const Duration(milliseconds: 320),
+              direction: SlideDirection.fromBottom,
+              distance: 0.1,
+              curve: Curves.easeOutCubic,
+              child: Column(
+                children: [
+                  Text(
+                    data.title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: screenHeight < 700 ? 27 : 31,
+                      height: 1.15,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.8,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  data.description,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    height: 1.6,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 16),
+                  Text(
+                    data.description,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.6,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -321,65 +348,76 @@ class _IllustrationCard extends StatelessWidget {
             ),
           ),
           Center(
-            child: Container(
-              width: size * 0.48,
-              height: size * 0.48,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(
-                  size * 0.16,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(
-                      alpha: 0.22,
-                    ),
-                    blurRadius: 32,
-                    offset: const Offset(
-                      0,
-                      16,
-                    ),
+            child: AppScaleIn(
+              duration: const Duration(milliseconds: 320),
+              beginScale: 0.88,
+              curve: Curves.easeOutCubic,
+              child: Container(
+                width: size * 0.48,
+                height: size * 0.48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(
+                    size * 0.16,
                   ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: size * 0.24,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(
+                        alpha: 0.22,
+                      ),
+                      blurRadius: 32,
+                      offset: const Offset(
+                        0,
+                        16,
+                      ),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: size * 0.24,
+                ),
               ),
             ),
           ),
           Positioned(
             left: 18,
             top: 18,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 7,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: 0.06,
+            child: AppScaleIn(
+              delay: const Duration(milliseconds: 80),
+              duration: const Duration(milliseconds: 260),
+              beginScale: 0.82,
+              curve: Curves.easeOutBack,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: 0.06,
+                      ),
+                      blurRadius: 12,
+                      offset: const Offset(
+                        0,
+                        4,
+                      ),
                     ),
-                    blurRadius: 12,
-                    offset: const Offset(
-                      0,
-                      4,
-                    ),
+                  ],
+                ),
+                child: Text(
+                  badge,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
                   ),
-                ],
-              ),
-              child: Text(
-                badge,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
                 ),
               ),
             ),
@@ -387,8 +425,15 @@ class _IllustrationCard extends StatelessWidget {
           Positioned(
             right: 18,
             bottom: 18,
-            child: _MiniFeatureIcon(
-              icon: _featureIconForPage(pageIndex),
+            child: AppSlideIn(
+              delay: const Duration(milliseconds: 110),
+              duration: const Duration(milliseconds: 280),
+              direction: SlideDirection.fromBottom,
+              distance: 0.12,
+              curve: Curves.easeOutCubic,
+              child: _MiniFeatureIcon(
+                icon: _featureIconForPage(pageIndex),
+              ),
             ),
           ),
         ],
@@ -483,7 +528,7 @@ class _BottomSection extends StatelessWidget {
                   duration: const Duration(
                     milliseconds: 250,
                   ),
-                  curve: Curves.easeOut,
+                  curve: Curves.easeOutCubic,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 4,
                   ),
@@ -513,8 +558,25 @@ class _BottomSection extends StatelessWidget {
               ),
               child: AnimatedSwitcher(
                 duration: const Duration(
-                  milliseconds: 200,
+                  milliseconds: 220,
                 ),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.0, 0.15),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  );
+                },
                 child: Row(
                   key: ValueKey<bool>(isLastPage),
                   mainAxisSize: MainAxisSize.min,

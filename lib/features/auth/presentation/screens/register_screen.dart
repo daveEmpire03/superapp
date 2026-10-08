@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -307,276 +308,352 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _TopNavigation(
-                            onBack: () {
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                _goToSignIn();
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 28),
-                          const _BrandHeader(),
-                          const SizedBox(height: 38),
-                          const Text(
-                            'Create your account',
-                            style: TextStyle(
-                              fontSize: 30,
-                              height: 1.1,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.textPrimary,
-                              letterSpacing: -0.8,
+                          AppSlideIn(
+                            direction: SlideDirection.fromTop,
+                            duration: const Duration(milliseconds: 320),
+                            distance: 0.08,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _TopNavigation(
+                                  onBack: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      _goToSignIn();
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 28),
+                                const _BrandHeader(),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Join Bokku Mart to shop groceries, manage orders and enjoy a smoother shopping experience.',
-                            style: TextStyle(
-                              fontSize: 15,
-                              height: 1.55,
-                              color: AppColors.textSecondary,
+                          const SizedBox(height: 38),
+                          const AppSlideIn(
+                            delay: Duration(milliseconds: 70),
+                            duration: Duration(milliseconds: 300),
+                            direction: SlideDirection.fromBottom,
+                            distance: 0.08,
+                            curve: Curves.easeOutCubic,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Create your account',
+                                  style: TextStyle(
+                                    fontSize: 30,
+                                    height: 1.1,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.textPrimary,
+                                    letterSpacing: -0.8,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  'Join Bokku Mart to shop groceries, manage orders and enjoy a smoother shopping experience.',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    height: 1.55,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 34),
-                          const _FieldLabel(
-                            label: 'Full name',
-                          ),
-                          const SizedBox(height: 9),
-                          TextFormField(
-                            controller: _nameController,
-                            textInputAction: TextInputAction.next,
-                            textCapitalization: TextCapitalization.words,
-                            autofillHints: const [
-                              AutofillHints.name,
-                            ],
-                            validator: _validateName,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: _inputDecoration(
-                              hintText: 'Enter your full name',
-                              prefixIcon: Icons.person_outline_rounded,
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          const _FieldLabel(
-                            label: 'Email address',
-                          ),
-                          const SizedBox(height: 9),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [
-                              AutofillHints.email,
-                            ],
-                            autocorrect: false,
-                            validator: _validateEmail,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: _inputDecoration(
-                              hintText: 'you@example.com',
-                              prefixIcon: Icons.email_outlined,
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          const _FieldLabel(
-                            label: 'Phone number',
-                          ),
-                          const SizedBox(height: 9),
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [
-                              AutofillHints.telephoneNumber,
-                            ],
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9+\s]'),
-                              ),
-                            ],
-                            validator: _validatePhone,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: _inputDecoration(
-                              hintText: '0801 234 5678',
-                              prefixIcon: Icons.phone_outlined,
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          const _FieldLabel(
-                            label: 'Password',
-                          ),
-                          const SizedBox(height: 9),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [
-                              AutofillHints.newPassword,
-                            ],
-                            validator: _validatePassword,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: _inputDecoration(
-                              hintText: 'Minimum 8 characters',
-                              prefixIcon: Icons.lock_outline_rounded,
-                              suffixIcon: IconButton(
-                                tooltip: _obscurePassword
-                                    ? 'Show password'
-                                    : 'Hide password',
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  size: 21,
-                                  color: AppColors.textSecondary,
+                          AppSlideIn(
+                            delay: const Duration(milliseconds: 140),
+                            duration: const Duration(milliseconds: 320),
+                            direction: SlideDirection.fromBottom,
+                            distance: 0.08,
+                            curve: Curves.easeOutCubic,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _FieldLabel(
+                                  label: 'Full name',
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const _PasswordHint(),
-                          const SizedBox(height: 22),
-                          const _FieldLabel(
-                            label: 'Confirm password',
-                          ),
-                          const SizedBox(height: 9),
-                          TextFormField(
-                            controller: _confirmPasswordController,
-                            obscureText: _obscureConfirmPassword,
-                            textInputAction: TextInputAction.done,
-                            autofillHints: const [
-                              AutofillHints.newPassword,
-                            ],
-                            validator: _validateConfirmPassword,
-                            onFieldSubmitted: (_) {
-                              _onRegister();
-                            },
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: _inputDecoration(
-                              hintText: 'Enter your password again',
-                              prefixIcon: Icons.lock_outline_rounded,
-                              suffixIcon: IconButton(
-                                tooltip: _obscureConfirmPassword
-                                    ? 'Show password'
-                                    : 'Hide password',
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword =
-                                        !_obscureConfirmPassword;
-                                  });
-                                },
-                                icon: Icon(
-                                  _obscureConfirmPassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  size: 21,
-                                  color: AppColors.textSecondary,
+                                const SizedBox(height: 9),
+                                TextFormField(
+                                  controller: _nameController,
+                                  textInputAction: TextInputAction.next,
+                                  textCapitalization: TextCapitalization.words,
+                                  autofillHints: const [
+                                    AutofillHints.name,
+                                  ],
+                                  validator: _validateName,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: _inputDecoration(
+                                    hintText: 'Enter your full name',
+                                    prefixIcon: Icons.person_outline_rounded,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              final isLoading = state is AuthLoading;
-
-                              return SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton(
-                                  onPressed: isLoading ? null : _onRegister,
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    disabledBackgroundColor:
-                                        AppColors.primary.withValues(
-                                      alpha: 0.55,
+                                const SizedBox(height: 22),
+                                const _FieldLabel(
+                                  label: 'Email address',
+                                ),
+                                const SizedBox(height: 9),
+                                TextFormField(
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [
+                                    AutofillHints.email,
+                                  ],
+                                  autocorrect: false,
+                                  validator: _validateEmail,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: _inputDecoration(
+                                    hintText: 'you@example.com',
+                                    prefixIcon: Icons.email_outlined,
+                                  ),
+                                ),
+                                const SizedBox(height: 22),
+                                const _FieldLabel(
+                                  label: 'Phone number',
+                                ),
+                                const SizedBox(height: 9),
+                                TextFormField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [
+                                    AutofillHints.telephoneNumber,
+                                  ],
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9+\s]'),
                                     ),
-                                    disabledForegroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        18,
+                                  ],
+                                  validator: _validatePhone,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: _inputDecoration(
+                                    hintText: '0801 234 5678',
+                                    prefixIcon: Icons.phone_outlined,
+                                  ),
+                                ),
+                                const SizedBox(height: 22),
+                                const _FieldLabel(
+                                  label: 'Password',
+                                ),
+                                const SizedBox(height: 9),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: _obscurePassword,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [
+                                    AutofillHints.newPassword,
+                                  ],
+                                  validator: _validatePassword,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: _inputDecoration(
+                                    hintText: 'Minimum 8 characters',
+                                    prefixIcon: Icons.lock_outline_rounded,
+                                    suffixIcon: IconButton(
+                                      tooltip: _obscurePassword
+                                          ? 'Show password'
+                                          : 'Hide password',
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        size: 21,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(
-                                      milliseconds: 200,
+                                ),
+                                const SizedBox(height: 10),
+                                const _PasswordHint(),
+                                const SizedBox(height: 22),
+                                const _FieldLabel(
+                                  label: 'Confirm password',
+                                ),
+                                const SizedBox(height: 9),
+                                TextFormField(
+                                  controller: _confirmPasswordController,
+                                  obscureText: _obscureConfirmPassword,
+                                  textInputAction: TextInputAction.done,
+                                  autofillHints: const [
+                                    AutofillHints.newPassword,
+                                  ],
+                                  validator: _validateConfirmPassword,
+                                  onFieldSubmitted: (_) {
+                                    _onRegister();
+                                  },
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: _inputDecoration(
+                                    hintText: 'Enter your password again',
+                                    prefixIcon: Icons.lock_outline_rounded,
+                                    suffixIcon: IconButton(
+                                      tooltip: _obscureConfirmPassword
+                                          ? 'Show password'
+                                          : 'Hide password',
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureConfirmPassword =
+                                              !_obscureConfirmPassword;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        size: 21,
+                                        color: AppColors.textSecondary,
+                                      ),
                                     ),
-                                    child: isLoading
-                                        ? const SizedBox(
-                                            key: ValueKey(
-                                              'register-loading',
-                                            ),
-                                            width: 22,
-                                            height: 22,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.4,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : const Row(
-                                            key: ValueKey(
-                                              'create-account',
-                                            ),
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                'Create Account',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Icon(
-                                                Icons.arrow_forward_rounded,
-                                                size: 20,
-                                              ),
-                                            ],
-                                          ),
                                   ),
                                 ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 22),
-                          const _VerificationNotice(),
+                          const SizedBox(height: 30),
+                          AppSlideIn(
+                            delay: const Duration(milliseconds: 200),
+                            duration: const Duration(milliseconds: 300),
+                            direction: SlideDirection.fromBottom,
+                            distance: 0.08,
+                            curve: Curves.easeOutCubic,
+                            child: Column(
+                              children: [
+                                BlocBuilder<AuthBloc, AuthState>(
+                                  builder: (context, state) {
+                                    final isLoading = state is AuthLoading;
+
+                                    return SizedBox(
+                                      width: double.infinity,
+                                      height: 56,
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            isLoading ? null : _onRegister,
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          disabledBackgroundColor: AppColors
+                                              .primary
+                                              .withValues(alpha: 0.55),
+                                          disabledForegroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
+                                        ),
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          transitionBuilder:
+                                              (child, animation) {
+                                            return FadeTransition(
+                                              opacity: animation,
+                                              child: ScaleTransition(
+                                                scale: Tween<double>(
+                                                  begin: 0.88,
+                                                  end: 1.0,
+                                                ).animate(
+                                                  CurvedAnimation(
+                                                    parent: animation,
+                                                    curve: Curves.easeOutCubic,
+                                                  ),
+                                                ),
+                                                child: child,
+                                              ),
+                                            );
+                                          },
+                                          child: isLoading
+                                              ? const SizedBox(
+                                                  key: ValueKey(
+                                                    'register-loading',
+                                                  ),
+                                                  width: 22,
+                                                  height: 22,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 2.4,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              : const Row(
+                                                  key: ValueKey(
+                                                    'create-account',
+                                                  ),
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      'Create Account',
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Icon(
+                                                      Icons
+                                                          .arrow_forward_rounded,
+                                                      size: 20,
+                                                    ),
+                                                  ],
+                                                ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 22),
+                                const _VerificationNotice(),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 24),
-                          const _TermsNotice(),
-                          const SizedBox(height: 26),
-                          _SignInSection(
-                            onPressed: _goToSignIn,
+                          AppFadeIn(
+                            delay: const Duration(milliseconds: 260),
+                            duration: const Duration(milliseconds: 320),
+                            curve: Curves.easeOutCubic,
+                            child: Column(
+                              children: [
+                                const _TermsNotice(),
+                                const SizedBox(height: 26),
+                                _SignInSection(
+                                  onPressed: _goToSignIn,
+                                ),
+                                const SizedBox(height: 28),
+                                const _SecurityMessage(),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 28),
-                          const _SecurityMessage(),
                         ],
                       ),
                     ),

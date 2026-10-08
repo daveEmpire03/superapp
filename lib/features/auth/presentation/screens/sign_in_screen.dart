@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 import '../bloc/auth_bloc.dart';
@@ -185,231 +186,305 @@ class _SignInScreenState extends State<SignInScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildTopNavigation(),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                const _BrandHeader(),
-                                const SizedBox(
-                                  height: 42,
-                                ),
-                                const Text(
-                                  'Welcome back',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    height: 1.1,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.textPrimary,
-                                    letterSpacing: -0.8,
+                                AppSlideIn(
+                                  direction: SlideDirection.fromTop,
+                                  duration: const Duration(milliseconds: 320),
+                                  distance: 0.08,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _buildTopNavigation(),
+                                      const SizedBox(height: 30),
+                                      const _BrandHeader(),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(
-                                  height: 10,
+                                  height: 42,
                                 ),
-                                const Text(
-                                  'Sign in to continue shopping for your everyday essentials with Bokku Mart.',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    height: 1.55,
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.textSecondary,
+                                const AppSlideIn(
+                                  delay: Duration(milliseconds: 70),
+                                  duration: Duration(milliseconds: 300),
+                                  direction: SlideDirection.fromBottom,
+                                  distance: 0.08,
+                                  curve: Curves.easeOutCubic,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Welcome back',
+                                        style: TextStyle(
+                                          fontSize: 30,
+                                          height: 1.1,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.textPrimary,
+                                          letterSpacing: -0.8,
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Sign in to continue shopping for your everyday essentials with Bokku Mart.',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          height: 1.55,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 34,
                                 ),
-                                const _FieldLabel(
-                                  label: 'Email address',
-                                ),
-                                const SizedBox(
-                                  height: 9,
-                                ),
-                                TextFormField(
-                                  controller: _emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  textInputAction: TextInputAction.next,
-                                  autofillHints: const [
-                                    AutofillHints.email,
-                                  ],
-                                  autocorrect: false,
-                                  validator: _validateEmail,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  decoration: _inputDecoration(
-                                    hintText: 'you@example.com',
-                                    prefixIcon: Icons.email_outlined,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 22,
-                                ),
-                                Row(
-                                  children: [
-                                    const Expanded(
-                                      child: _FieldLabel(
-                                        label: 'Password',
+                                AppSlideIn(
+                                  delay: const Duration(milliseconds: 140),
+                                  duration: const Duration(milliseconds: 320),
+                                  direction: SlideDirection.fromBottom,
+                                  distance: 0.08,
+                                  curve: Curves.easeOutCubic,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const _FieldLabel(
+                                        label: 'Email address',
                                       ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        context.pushNamed(
-                                            RouteNames.forgotPassword);
-                                      },
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
+                                      const SizedBox(
+                                        height: 9,
                                       ),
-                                      child: const Text(
-                                        'Forgot Password?',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.primary,
+                                      TextFormField(
+                                        controller: _emailController,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        textInputAction: TextInputAction.next,
+                                        autofillHints: const [
+                                          AutofillHints.email,
+                                        ],
+                                        autocorrect: false,
+                                        validator: _validateEmail,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                        decoration: _inputDecoration(
+                                          hintText: 'you@example.com',
+                                          prefixIcon: Icons.email_outlined,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 9,
-                                ),
-                                TextFormField(
-                                  controller: _passwordController,
-                                  obscureText: _obscurePassword,
-                                  textInputAction: TextInputAction.done,
-                                  autofillHints: const [
-                                    AutofillHints.password,
-                                  ],
-                                  validator: _validatePassword,
-                                  onFieldSubmitted: (_) {
-                                    _onSignIn();
-                                  },
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  decoration: _inputDecoration(
-                                    hintText: 'Enter your password',
-                                    prefixIcon: Icons.lock_outline_rounded,
-                                    suffixIcon: IconButton(
-                                      tooltip: _obscurePassword
-                                          ? 'Show password'
-                                          : 'Hide password',
-                                      onPressed: () {
-                                        setState(
-                                          () {
-                                            _obscurePassword =
-                                                !_obscurePassword;
-                                          },
-                                        );
-                                      },
-                                      icon: Icon(
-                                        _obscurePassword
-                                            ? Icons.visibility_off_outlined
-                                            : Icons.visibility_outlined,
-                                        size: 21,
-                                        color: AppColors.textSecondary,
+                                      const SizedBox(
+                                        height: 22,
                                       ),
-                                    ),
+                                      Row(
+                                        children: [
+                                          const Expanded(
+                                            child: _FieldLabel(
+                                              label: 'Password',
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              context.pushNamed(
+                                                  RouteNames.forgotPassword);
+                                            },
+                                            style: TextButton.styleFrom(
+                                              padding: EdgeInsets.zero,
+                                              minimumSize: Size.zero,
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                            child: const Text(
+                                              'Forgot Password?',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 9,
+                                      ),
+                                      TextFormField(
+                                        controller: _passwordController,
+                                        obscureText: _obscurePassword,
+                                        textInputAction: TextInputAction.done,
+                                        autofillHints: const [
+                                          AutofillHints.password,
+                                        ],
+                                        validator: _validatePassword,
+                                        onFieldSubmitted: (_) {
+                                          _onSignIn();
+                                        },
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                        decoration: _inputDecoration(
+                                          hintText: 'Enter your password',
+                                          prefixIcon:
+                                              Icons.lock_outline_rounded,
+                                          suffixIcon: IconButton(
+                                            tooltip: _obscurePassword
+                                                ? 'Show password'
+                                                : 'Hide password',
+                                            onPressed: () {
+                                              setState(
+                                                () {
+                                                  _obscurePassword =
+                                                      !_obscurePassword;
+                                                },
+                                              );
+                                            },
+                                            icon: Icon(
+                                              _obscurePassword
+                                                  ? Icons
+                                                      .visibility_off_outlined
+                                                  : Icons.visibility_outlined,
+                                              size: 21,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 30,
                                 ),
-                                BlocBuilder<AuthBloc, AuthState>(
-                                  builder: (
-                                    context,
-                                    state,
-                                  ) {
-                                    final isLoading = state is AuthLoading;
+                                AppSlideIn(
+                                  delay: const Duration(milliseconds: 200),
+                                  duration: const Duration(milliseconds: 300),
+                                  direction: SlideDirection.fromBottom,
+                                  distance: 0.08,
+                                  curve: Curves.easeOutCubic,
+                                  child: BlocBuilder<AuthBloc, AuthState>(
+                                    builder: (
+                                      context,
+                                      state,
+                                    ) {
+                                      final isLoading = state is AuthLoading;
 
-                                    return SizedBox(
-                                      width: double.infinity,
-                                      height: 56,
-                                      child: ElevatedButton(
-                                        onPressed: isLoading ? null : _onSignIn,
-                                        style: ElevatedButton.styleFrom(
-                                          elevation: 0,
-                                          backgroundColor: AppColors.primary,
-                                          foregroundColor: Colors.white,
-                                          disabledBackgroundColor:
-                                              AppColors.primary.withValues(
-                                            alpha: 0.55,
-                                          ),
-                                          disabledForegroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              18,
+                                      return SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: ElevatedButton(
+                                          onPressed:
+                                              isLoading ? null : _onSignIn,
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: AppColors
+                                                .primary
+                                                .withValues(alpha: 0.55),
+                                            disabledForegroundColor:
+                                                Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                18,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        child: AnimatedSwitcher(
-                                          duration: const Duration(
-                                            milliseconds: 200,
-                                          ),
-                                          child: isLoading
-                                              ? const SizedBox(
-                                                  key: ValueKey(
-                                                    'loading',
-                                                  ),
-                                                  width: 22,
-                                                  height: 22,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2.4,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : const Row(
-                                                  key: ValueKey(
-                                                    'sign-in',
-                                                  ),
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      'Sign In',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                      ),
+                                          child: AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 200,
+                                            ),
+                                            transitionBuilder:
+                                                (child, animation) {
+                                              return FadeTransition(
+                                                opacity: animation,
+                                                child: ScaleTransition(
+                                                  scale: Tween<double>(
+                                                    begin: 0.88,
+                                                    end: 1.0,
+                                                  ).animate(
+                                                    CurvedAnimation(
+                                                      parent: animation,
+                                                      curve:
+                                                          Curves.easeOutCubic,
                                                     ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Icon(
-                                                      Icons
-                                                          .arrow_forward_rounded,
-                                                      size: 20,
-                                                    ),
-                                                  ],
+                                                  ),
+                                                  child: child,
                                                 ),
+                                              );
+                                            },
+                                            child: isLoading
+                                                ? const SizedBox(
+                                                    key: ValueKey(
+                                                      'loading',
+                                                    ),
+                                                    width: 22,
+                                                    height: 22,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2.4,
+                                                      color: Colors.white,
+                                                    ),
+                                                  )
+                                                : const Row(
+                                                    key: ValueKey(
+                                                      'sign-in',
+                                                    ),
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        'Sign In',
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w800,
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Icon(
+                                                        Icons
+                                                            .arrow_forward_rounded,
+                                                        size: 20,
+                                                      ),
+                                                    ],
+                                                  ),
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
+                                      );
+                                    },
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 32,
                                 ),
-                                const _OrDivider(),
-                                const SizedBox(
-                                  height: 28,
+                                AppFadeIn(
+                                  delay: const Duration(milliseconds: 260),
+                                  duration: const Duration(milliseconds: 320),
+                                  curve: Curves.easeOutCubic,
+                                  child: Column(
+                                    children: [
+                                      const _OrDivider(),
+                                      const SizedBox(
+                                        height: 28,
+                                      ),
+                                      _CreateAccountSection(
+                                        onPressed: _goToRegister,
+                                      ),
+                                      const SizedBox(
+                                        height: 26,
+                                      ),
+                                      const _SecurityMessage(),
+                                    ],
+                                  ),
                                 ),
-                                _CreateAccountSection(
-                                  onPressed: _goToRegister,
-                                ),
-                                const SizedBox(
-                                  height: 26,
-                                ),
-                                const _SecurityMessage(),
                               ],
                             ),
                           ),
