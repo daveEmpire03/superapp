@@ -13,10 +13,12 @@ class RiverpodBuilder<T> extends ConsumerWidget {
     super.key,
     required this.provider,
     required this.builder,
+    this.buildWhen,
   });
 
   final ProviderListenable<T> provider;
   final StateWidgetBuilder<T> builder;
+  final StatePredicate<T>? buildWhen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
