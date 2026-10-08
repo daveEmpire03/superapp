@@ -1,13 +1,14 @@
+import 'package:bokku_mart/features/cart/presentation/providers/cart_state_provider.dart';
+import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../domain/entities/cart_item_entity.dart';
-import '../bloc/cart_bloc.dart';
 import '../bloc/cart_event.dart';
 import '../bloc/cart_state.dart';
 
@@ -28,7 +29,8 @@ class CartScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          BlocBuilder<CartBloc, CartState>(
+          RiverpodBuilder<CartState>(
+      provider: cartStateProvider,
             builder: (context, state) {
               if (state is CartLoaded && state.items.isNotEmpty) {
                 return TextButton(
@@ -50,7 +52,8 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<CartBloc, CartState>(
+      body: RiverpodBuilder<CartState>(
+      provider: cartStateProvider,
         builder: (context, state) {
           if (state is CartLoading) {
             return const Center(
@@ -64,7 +67,7 @@ class CartScreen extends StatelessWidget {
             return _CartErrorView(
               message: state.message,
               onRetry: () {
-                context.read<CartBloc>().add(
+                ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
                       const LoadCartEvent(),
                     );
               },
@@ -109,7 +112,7 @@ class CartScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(dialogContext);
 
-                context.read<CartBloc>().add(
+                ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
                       const ClearCartEvent(),
                     );
               },
@@ -432,7 +435,7 @@ class _QuantityStepper extends StatelessWidget {
                   : AppColors.textPrimary,
             ),
             onPressed: () {
-              context.read<CartBloc>().add(
+              ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
                     UpdateCartQuantityEvent(
                       item.id,
                       item.quantity - 1,
@@ -461,7 +464,7 @@ class _QuantityStepper extends StatelessWidget {
             ),
             onPressed: item.canIncrement
                 ? () {
-                    context.read<CartBloc>().add(
+                    ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
                           UpdateCartQuantityEvent(
                             item.id,
                             item.quantity + 1,
