@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
+import '../../data/repositories/store_repository.dart';
 import '../bloc/store_event.dart';
 import '../bloc/store_state.dart';
 import '../../../../core/error/exceptions.dart';
