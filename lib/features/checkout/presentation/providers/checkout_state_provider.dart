@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
+import '../../domain/repositories/order_repository.dart';
 import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 
