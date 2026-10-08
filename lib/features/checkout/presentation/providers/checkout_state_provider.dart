@@ -23,13 +23,13 @@ class CheckoutController extends Notifier<CheckoutState> {
     if (event is LoadCheckoutInitialDataEvent) {
       await _onLoadInitialData(event, _emit);
     }     else if (event is SelectDeliveryMethodEvent) {
-      await _onSelectDeliveryMethod(event, _emit);
+      _onSelectDeliveryMethod(event, _emit);
     }     else if (event is SelectAddressEvent) {
-      await _onSelectAddress(event, _emit);
+      _onSelectAddress(event, _emit);
     }     else if (event is SelectPickupStoreEvent) {
-      await _onSelectPickupStore(event, _emit);
+      _onSelectPickupStore(event, _emit);
     }     else if (event is SelectPaymentMethodEvent) {
-      await _onSelectPaymentMethod(event, _emit);
+      _onSelectPaymentMethod(event, _emit);
     }     else if (event is SubmitPlaceOrderEvent) {
       await _onSubmitPlaceOrder(event, _emit);
     }
