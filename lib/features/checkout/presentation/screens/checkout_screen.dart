@@ -252,8 +252,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedAddress?.id,
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectAddressEvent(addr));
                                     },
                                     title: Text(
@@ -294,8 +293,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     groupValue: checkoutState.selectedStore?.id,
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPickupStoreEvent(store));
                                     },
                                     title: Text(store.name,
@@ -334,8 +332,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
@@ -354,8 +351,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
@@ -374,8 +370,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         checkoutState.selectedPaymentMethod,
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
-                                      context
-                                          .read<CheckoutBloc>()
+                                      ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
                                           .add(SelectPaymentMethodEvent(val!));
                                     },
                                     title: const Text(
