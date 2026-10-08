@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 
 typedef StateChanged<T> = void Function(BuildContext context, T state);
 typedef StateWidgetBuilder<T> = Widget Function(BuildContext context, T state);
