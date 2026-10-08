@@ -44,7 +44,7 @@ class _BokkuMartAppState extends ConsumerState<BokkuMartApp> {
       final catalog = ref.read(productStateProvider.notifier);
       if (previous is StoreLoaded &&
           previousStoreId == storeId &&
-          catalog.state is! ProductInitial) {
+          ref.read(productStateProvider) is! ProductInitial) {
         return;
       }
 
