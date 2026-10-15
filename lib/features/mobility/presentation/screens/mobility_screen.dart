@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bokku_mart/core/constants/app_colors.dart';
 import 'package:bokku_mart/core/location/location_service.dart';
 import 'package:bokku_mart/core/providers/repository_providers.dart';
@@ -35,15 +37,20 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
   String? _activeServiceId;
   String? _deliveryCode;
   List<Map<String, dynamic>> _history = const [];
+  Timer? _historyRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     _refreshHistory();
+    _historyRefreshTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (mounted && !_busy) _refreshHistory();
+    });
   }
 
   @override
   void dispose() {
+    _historyRefreshTimer?.cancel();
     _pickupAddress.dispose();
     _pickupLat.dispose();
     _pickupLon.dispose();
@@ -490,7 +497,14 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
                     title: Text('${_service == 'RIDE' ? item['vehicle_type'] ?? 'Ride' : item['package_description'] ?? 'Parcel'} • ${_money(item['quoted_fare'])}'),
-                    subtitle: Text('${item['pickup_address'] ?? ''} → ${item['destination_address'] ?? ''}\n$statusValue • ${item['payment_status'] ?? 'UNPAID'}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${item['pickup_address'] ?? ''} → ${item['destination_address'] ?? ''}\n$statusValue • ${item['payment_status'] ?? 'UNPAID'}'),
+                        if (item['driver_name'] != null) Text('Driver: ${item['driver_name']}'),
+                        if (item['driver_location'] != null) Text('Driver location: ${item['driver_location']['latitude']}, ${item['driver_location']['longitude']}'),
+                      ],
+                    ),
                     isThreeLine: true,
                     trailing: canCancel && id.isNotEmpty
                         ? IconButton(
