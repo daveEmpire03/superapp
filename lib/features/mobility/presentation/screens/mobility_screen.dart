@@ -122,6 +122,11 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
 
   Future<void> _requestService() async {
     if (!_formKey.currentState!.validate()) return;
+    const redirectUrl = String.fromEnvironment('PAYMENT_REDIRECT_URL');
+    if (_paymentMethod == 'ONLINE' && redirectUrl.isEmpty) {
+      setState(() => _error = 'Configure PAYMENT_REDIRECT_URL at build time before using online payments.');
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -139,12 +144,6 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
       _deliveryCode = data['delivery_code']?.toString();
 
       if (_paymentMethod == 'ONLINE' && _activeServiceId != null) {
-        const redirectUrl = String.fromEnvironment('PAYMENT_REDIRECT_URL');
-        if (redirectUrl.isEmpty) {
-          throw StateError(
-            'The app was built without PAYMENT_REDIRECT_URL. Configure the verified payment return URL before using online payments.',
-          );
-        }
         final paymentResponse = await ref.read(dioClientProvider).dio.post(
           'payments/services/initialize/',
           data: {
@@ -159,10 +158,13 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
         if (checkoutUrl == null || checkoutUrl.isEmpty) {
           throw StateError('The payment provider did not return a checkout URL.');
         }
-        await launchUrl(
+        final launched = await launchUrl(
           Uri.parse(checkoutUrl),
           mode: LaunchMode.externalApplication,
         );
+        if (!launched) {
+          throw StateError('Could not open the payment checkout link.');
+        }
       }
 
       _quote = null;
@@ -479,10 +481,11 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
               ..._history.map((item) {
                 final id = item['id']?.toString() ?? '';
                 final statusValue = item['status']?.toString() ?? 'UNKNOWN';
-                final canCancel = const {
+                final canCancel = (_service == 'RIDE' && const {
                   'REQUESTED', 'SEARCHING', 'DRIVER_ASSIGNED', 'DRIVER_ARRIVING',
-                }.contains(statusValue) && _service == 'RIDE' ||
-                    const {'REQUESTED', 'DRIVER_ASSIGNED'}.contains(statusValue) && _service == 'PARCEL';
+                }.contains(statusValue)) || (_service == 'PARCEL' && const {
+                  'REQUESTED', 'DRIVER_ASSIGNED',
+                }.contains(statusValue));
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
