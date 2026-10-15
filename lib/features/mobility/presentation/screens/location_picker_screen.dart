@@ -106,7 +106,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       );
       final body = Map<String, dynamic>.from(response.data as Map);
       final displayName = body['display_name']?.toString().trim();
-      if (displayName != null && displayName.isNotEmpty) address = displayName;
+      if (displayName != null && displayName.isNotEmpty) {
+        address = displayName.length > 255 ? displayName.substring(0, 255) : displayName;
+      }
     } catch (_) {
       // Keep a usable coordinate address when reverse geocoding is unavailable.
     }
