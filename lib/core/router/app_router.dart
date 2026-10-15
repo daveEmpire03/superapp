@@ -38,6 +38,7 @@ import '../../features/profile/presentation/screens/deals_screen.dart';
 import '../../features/profile/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/mobility/presentation/screens/mobility_screen.dart';
+import '../../features/mobility/presentation/screens/location_picker_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -217,6 +218,21 @@ class AppRouter {
         name: RouteNames.notifications,
         builder: (context, state) {
           return const NotificationsScreen();
+        },
+      ),
+
+      GoRoute(
+        path: '/location-picker',
+        name: 'locationPicker',
+        builder: (context, state) {
+          final args = state.extra is Map
+              ? Map<String, dynamic>.from(state.extra as Map)
+              : <String, dynamic>{};
+          return LocationPickerScreen(
+            label: args['label']?.toString() ?? 'Location',
+            initialLatitude: (args['latitude'] as num?)?.toDouble(),
+            initialLongitude: (args['longitude'] as num?)?.toDouble(),
+          );
         },
       ),
 
