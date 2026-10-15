@@ -39,6 +39,7 @@ import '../../features/profile/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/mobility/presentation/screens/mobility_screen.dart';
 import '../../features/mobility/presentation/screens/location_picker_screen.dart';
+import '../../features/mobility/presentation/screens/mobility_tracking_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -218,6 +219,18 @@ class AppRouter {
         name: RouteNames.notifications,
         builder: (context, state) {
           return const NotificationsScreen();
+        },
+      ),
+
+      GoRoute(
+        path: '/mobility/tracking',
+        name: 'mobilityTracking',
+        builder: (context, state) {
+          final args = Map<String, dynamic>.from(state.extra as Map);
+          return MobilityTrackingScreen(
+            serviceType: args['serviceType']?.toString() ?? 'RIDE',
+            initialJob: Map<String, dynamic>.from(args['job'] as Map),
+          );
         },
       ),
 
