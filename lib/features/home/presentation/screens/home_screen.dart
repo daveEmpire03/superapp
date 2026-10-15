@@ -73,7 +73,14 @@ class HomeScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: SafeArea(
+        floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/mobility'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.local_taxi_outlined),
+        label: const Text('Rides & Parcels'),
+      ),
+      body: SafeArea(
           child: RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () async {
