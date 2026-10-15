@@ -2,26 +2,40 @@ name: Flutter CI
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
 
-concurrency:
-  group: flutter-ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  analyze-and-test:
+  customer-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.47.5'
           cache: true
-      - name: Resolve dependencies
+      - name: Resolve customer app dependencies
         run: flutter pub get
-      - name: Static analysis
-        run: flutter analyze --no-fatal-infos
-      - name: Unit and widget tests
+      - name: Analyze customer app
+        run: flutter analyze
+      - name: Test customer app
+        run: flutter test
+
+  driver-app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: driver_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve driver app dependencies
+        run: flutter pub get
+      - name: Analyze driver app
+        run: flutter analyze
+      - name: Test driver app
         run: flutter test
