@@ -49,7 +49,7 @@ try {
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Bokku Driver uses your location to find nearby jobs and share your location during active deliveries.</string>
 '@
-        $Plist = $Plist -replace '</dict>', ($LocationEntry + [Environment]::NewLine + '</dict>')
+        $Plist = [regex]::Replace($Plist, '</dict>', ($LocationEntry + [Environment]::NewLine + '</dict>'), 1)
         Set-Content -Path $InfoPlist -Value $Plist -Encoding UTF8
     }
 
