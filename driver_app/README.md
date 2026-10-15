@@ -4,22 +4,23 @@ This is a separate Flutter application source tree for approved Bokku Mart drive
 
 ## Generate Android/iOS platform scaffolding
 
-From this directory, run:
+The repository keeps the driver app as an independent Flutter project. Generate its native platform folders without overwriting the existing Dart source.
+
+**Windows PowerShell:**
 
 ```powershell
-flutter create --project-name bokku_driver_app --platforms android,ios .
+.\bootstrap_platforms.ps1
 flutter pub get
 ```
 
-Then add the following Android permissions to `android/app/src/main/AndroidManifest.xml` above `<application>`:
+**macOS/Linux:**
 
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+```bash
+bash ./bootstrap_platforms.sh
+flutter pub get
 ```
 
-For iOS, add `NSLocationWhenInUseUsageDescription` to `ios/Runner/Info.plist`.
+The scripts generate Android/iOS scaffolding in a temporary Flutter project, copy only the native platform folders, and add network/location permissions plus the iOS location-purpose string. They do not replace the app's `lib/` source or `pubspec.yaml`.
 
 ## Run
 
