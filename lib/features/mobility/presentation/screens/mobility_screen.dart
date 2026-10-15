@@ -569,6 +569,10 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
+                    onTap: () => context.push('/mobility/tracking', extra: {
+                      'serviceType': _service,
+                      'job': item,
+                    }),
                     title: Text('${_service == 'RIDE' ? item['vehicle_type'] ?? 'Ride' : item['package_description'] ?? 'Parcel'} • ${_money(item['quoted_fare'])}'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
