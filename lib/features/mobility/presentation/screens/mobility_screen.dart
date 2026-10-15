@@ -6,6 +6,7 @@ import 'package:bokku_mart/core/network/api_endpoints.dart';
 import 'package:bokku_mart/core/providers/repository_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MobilityScreen extends ConsumerStatefulWidget {
@@ -84,6 +85,26 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
       'recipient_phone': _recipientPhone.text.trim(),
       ...common,
     };
+  }
+
+  Future<void> _pickLocation({required bool pickup}) async {
+    final latitudeController = pickup ? _pickupLat : _destinationLat;
+    final longitudeController = pickup ? _pickupLon : _destinationLon;
+    final result = await context.push<Map<String, dynamic>>(
+      '/location-picker',
+      extra: {
+        'label': pickup ? 'Pickup' : 'Destination',
+        'latitude': double.tryParse(latitudeController.text.trim()),
+        'longitude': double.tryParse(longitudeController.text.trim()),
+      },
+    );
+    if (result == null || !mounted) return;
+    latitudeController.text = (result['latitude'] as num).toDouble().toStringAsFixed(7);
+    longitudeController.text = (result['longitude'] as num).toDouble().toStringAsFixed(7);
+    final addressController = pickup ? _pickupAddress : _destinationAddress;
+    final address = result['address']?.toString();
+    if (address != null && address.isNotEmpty) addressController.text = address;
+    setState(() { _quote = null; _error = null; });
   }
 
   Future<void> _useCurrentLocation() async {
@@ -419,10 +440,20 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: _busy ? null : _useCurrentLocation,
-                      icon: const Icon(Icons.my_location),
-                      label: const Text('Use my current pickup location'),
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _busy ? null : _useCurrentLocation,
+                          icon: const Icon(Icons.my_location),
+                          label: const Text('Use current location'),
+                        ),
+                        TextButton.icon(
+                          onPressed: _busy ? null : () => _pickLocation(pickup: true),
+                          icon: const Icon(Icons.map_outlined),
+                          label: const Text('Choose pickup on map'),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -435,6 +466,14 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                       const SizedBox(width: 10),
                       Expanded(child: _field(_destinationLon, 'Destination longitude', keyboard: const TextInputType.numberWithOptions(decimal: true, signed: true))),
                     ],
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: _busy ? null : () => _pickLocation(pickup: false),
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text('Choose destination on map'),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
