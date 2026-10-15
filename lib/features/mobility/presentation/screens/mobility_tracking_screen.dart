@@ -67,7 +67,13 @@ class _MobilityTrackingScreenState extends ConsumerState<MobilityTrackingScreen>
       final rawLocation = data['driver_location'];
       if (rawLocation is Map) {
         final point = _point(rawLocation['latitude'], rawLocation['longitude']);
-        if (point != null) _mapController.move(point, 15);
+        if (point != null) {
+          try {
+            _mapController.move(point, 15);
+          } catch (_) {
+            // The map may not be attached yet during an immediate manual refresh.
+          }
+        }
       }
       if (mounted) {
         setState(() {
