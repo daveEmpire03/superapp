@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,13 +25,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   static const LatLng _ibadanCenter = LatLng(7.3775, 3.9470);
 
   final MapController _mapController = MapController();
-  final Dio _geocoder = Dio(BaseOptions(
-    baseUrl: 'https://nominatim.openstreetmap.org/',
-    connectTimeout: const Duration(seconds: 8),
-    receiveTimeout: const Duration(seconds: 8),
-    headers: const {'User-Agent': 'BokkuMart/1.0', 'Accept': 'application/json'},
-  ));
-
   LatLng? _selected;
   bool _busy = false;
   String? _error;
@@ -92,31 +84,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       return;
     }
     setState(() { _busy = true; _error = null; });
-    var address = 'Lat ${point.latitude.toStringAsFixed(6)}, Lon ${point.longitude.toStringAsFixed(6)}';
-    try {
-      final response = await _geocoder.get(
-        'reverse',
-        queryParameters: {
-          'format': 'jsonv2',
-          'lat': point.latitude,
-          'lon': point.longitude,
-          'zoom': 18,
-          'addressdetails': 1,
-        },
-      );
-      final body = Map<String, dynamic>.from(response.data as Map);
-      final displayName = body['display_name']?.toString().trim();
-      if (displayName != null && displayName.isNotEmpty) {
-        address = displayName.length > 255 ? displayName.substring(0, 255) : displayName;
-      }
-    } catch (_) {
-      // Keep a usable coordinate address when reverse geocoding is unavailable.
-    }
     if (!mounted) return;
     Navigator.of(context).pop(<String, dynamic>{
       'latitude': point.latitude,
       'longitude': point.longitude,
-      'address': address,
     });
   }
 
@@ -171,7 +142,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Text(
-                  'Move the map and tap the exact ${widget.label.toLowerCase()} point. Use the GPS button for your current location.',
+                  'Tap the map to select the exact ${widget.label.toLowerCase()} point. Add a descriptive street address on the request form when available.',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
