@@ -37,6 +37,7 @@ import '../../features/checkout/presentation/screens/orders_history_screen.dart'
 import '../../features/profile/presentation/screens/deals_screen.dart';
 import '../../features/profile/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/mobility/presentation/screens/mobility_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -217,6 +218,12 @@ class AppRouter {
         builder: (context, state) {
           return const NotificationsScreen();
         },
+      ),
+
+      GoRoute(
+        path: '/mobility',
+        name: 'mobility',
+        builder: (context, state) => const MobilityScreen(),
       ),
 
       // -----------------------------------------------------------------------
