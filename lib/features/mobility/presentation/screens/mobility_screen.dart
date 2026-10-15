@@ -196,6 +196,32 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
     }
   }
 
+  Future<void> _payExisting(String id) async {
+    const redirectUrl = String.fromEnvironment('PAYMENT_REDIRECT_URL');
+    if (redirectUrl.isEmpty) {
+      setState(() => _error = 'Configure PAYMENT_REDIRECT_URL at build time before using online payments.');
+      return;
+    }
+    setState(() { _busy = true; _error = null; });
+    try {
+      final response = await ref.read(dioClientProvider).dio.post(
+        ApiEndpoints.servicePaymentInitialize,
+        data: {'service_type': _service, 'service_id': id, 'redirect_url': redirectUrl},
+      );
+      final body = Map<String, dynamic>.from(response.data as Map);
+      final checkoutUrl = body['checkout_url']?.toString();
+      if (checkoutUrl == null || checkoutUrl.isEmpty) {
+        throw StateError('The payment provider did not return a checkout URL.');
+      }
+      final launched = await launchUrl(Uri.parse(checkoutUrl), mode: LaunchMode.externalApplication);
+      if (!launched) throw StateError('Could not open the payment checkout link.');
+    } catch (error) {
+      _error = _friendlyError(error);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _verifyServicePayment() async {
     if (_transactionId.text.trim().isEmpty) {
       setState(() => _error = 'Enter the transaction ID returned by Flutterwave.');
@@ -494,6 +520,9 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                 }.contains(statusValue)) || (_service == 'PARCEL' && const {
                   'REQUESTED', 'DRIVER_ASSIGNED',
                 }.contains(statusValue));
+                final canPay = item['payment_method'] == 'ONLINE' &&
+                    item['payment_status'] != 'PAID' &&
+                    !const {'CANCELLED', 'NO_DRIVER', 'DELIVERED'}.contains(statusValue);
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
@@ -507,11 +536,17 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                       ],
                     ),
                     isThreeLine: true,
-                    trailing: canCancel && id.isNotEmpty
-                        ? IconButton(
-                            tooltip: 'Cancel request',
-                            onPressed: _busy ? null : () => _cancel(id),
-                            icon: const Icon(Icons.cancel_outlined, color: AppColors.error),
+                    trailing: (canCancel || canPay) && id.isNotEmpty
+                        ? PopupMenuButton<String>(
+                            enabled: !_busy,
+                            onSelected: (action) {
+                              if (action == 'pay') _payExisting(id);
+                              if (action == 'cancel') _cancel(id);
+                            },
+                            itemBuilder: (context) => [
+                              if (canPay) const PopupMenuItem(value: 'pay', child: Text('Pay online')),
+                              if (canCancel) const PopupMenuItem(value: 'cancel', child: Text('Cancel request')),
+                            ],
                           )
                         : null,
                   ),
