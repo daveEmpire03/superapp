@@ -103,7 +103,11 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
     longitudeController.text = (result['longitude'] as num).toDouble().toStringAsFixed(7);
     final addressController = pickup ? _pickupAddress : _destinationAddress;
     final address = result['address']?.toString();
-    if (address != null && address.isNotEmpty) addressController.text = address;
+    if (address != null && address.isNotEmpty) {
+      addressController.text = address;
+    } else if (addressController.text.trim().isEmpty) {
+      addressController.text = 'Map-selected location';
+    }
     setState(() { _quote = null; _error = null; });
   }
 
