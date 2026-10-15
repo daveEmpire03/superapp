@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/screens/driver_app.dart';
+import 'package:bokku_driver_app/screens/driver_app.dart';
 
 void main() {
   testWidgets('driver app shows a dedicated sign-in screen', (tester) async {
