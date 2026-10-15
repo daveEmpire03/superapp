@@ -132,6 +132,20 @@ class ApiEndpoints {
   }
 
   // ---------------------------------------------------------------------------
+  // Passenger mobility and independent parcel delivery
+  // ---------------------------------------------------------------------------
+
+  static const String rides = 'rides/';
+  static const String rideQuote = 'rides/quote/';
+  static const String parcels = 'parcels/';
+  static const String parcelQuote = 'parcels/quote/';
+  static const String servicePaymentInitialize = 'payments/services/initialize/';
+  static const String servicePaymentVerify = 'payments/services/verify/';
+
+  static String rideCancel(Object rideId) => 'rides/$rideId/cancel/';
+  static String parcelCancel(Object parcelId) => 'parcels/$parcelId/cancel/';
+
+  // ---------------------------------------------------------------------------
   // Promotions
   // ---------------------------------------------------------------------------
 
