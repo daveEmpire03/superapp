@@ -25,6 +25,7 @@ class MobilityTrackingScreen extends ConsumerStatefulWidget {
 class _MobilityTrackingScreenState extends ConsumerState<MobilityTrackingScreen> {
   static const LatLng _fallbackCenter = LatLng(7.3775, 3.9470);
 
+  final MapController _mapController = MapController();
   Map<String, dynamic> _job = const {};
   Timer? _timer;
   bool _refreshing = false;
@@ -63,6 +64,11 @@ class _MobilityTrackingScreenState extends ConsumerState<MobilityTrackingScreen>
       final base = widget.serviceType == 'RIDE' ? ApiEndpoints.rides : ApiEndpoints.parcels;
       final response = await ref.read(dioClientProvider).dio.get('$base$id/');
       final data = Map<String, dynamic>.from(response.data as Map);
+      final rawLocation = data['driver_location'];
+      if (rawLocation is Map) {
+        final point = _point(rawLocation['latitude'], rawLocation['longitude']);
+        if (point != null) _mapController.move(point, 15);
+      }
       if (mounted) {
         setState(() {
           _job = data;
@@ -126,6 +132,7 @@ class _MobilityTrackingScreenState extends ConsumerState<MobilityTrackingScreen>
         children: [
           Expanded(
             child: FlutterMap(
+              mapController: _mapController,
               options: MapOptions(initialCenter: center, initialZoom: driver == null ? 13 : 15),
               children: [
                 TileLayer(
