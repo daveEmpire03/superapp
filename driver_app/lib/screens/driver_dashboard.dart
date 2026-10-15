@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -48,8 +49,12 @@ class _DriverDashboardState extends State<DriverDashboard> {
       try {
         _profile = await widget.api.profile();
         _available = _profile?['is_available'] == true;
-      } catch (_) {
-        _profile = null;
+      } on DioException catch (error) {
+        if (error.response?.statusCode == 404) {
+          _profile = null;
+        } else {
+          rethrow;
+        }
       }
       if (_profile != null && _profile!['is_approved'] == true && _profile!['is_suspended'] != true) {
         if (_available) {
