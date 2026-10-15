@@ -20,7 +20,7 @@ bash ./bootstrap_platforms.sh
 flutter pub get
 ```
 
-The scripts generate Android/iOS scaffolding in a temporary Flutter project, copy only the native platform folders, and add network/location permissions plus the iOS location-purpose string. They do not replace the app's `lib/` source or `pubspec.yaml`.
+The Windows script generates Android scaffolding; the macOS/Linux script generates both Android and iOS scaffolding. They create a temporary Flutter project, copy only native platform folders, and add the required network/location permissions and iOS location-purpose string. They do not replace the app's `lib/` source or `pubspec.yaml`.
 
 ## Run
 
