@@ -22,6 +22,46 @@ class DriverApi {
         }
         handler.next(options);
       },
+      onError: (error, handler) async {
+        final options = error.requestOptions;
+        final shouldRefresh = error.response?.statusCode == 401 &&
+            options.extra['driver_refresh_attempted'] != true &&
+            !options.path.contains('auth/refresh/') &&
+            !options.path.contains('auth/login/');
+        if (!shouldRefresh) {
+          handler.next(error);
+          return;
+        }
+        final refreshToken = await _storage.read(key: 'refresh');
+        if (refreshToken == null || refreshToken.isEmpty) {
+          handler.next(error);
+          return;
+        }
+        try {
+          final refreshDio = Dio(BaseOptions(
+            baseUrl: _dio.options.baseUrl,
+            connectTimeout: _dio.options.connectTimeout,
+            receiveTimeout: _dio.options.receiveTimeout,
+            headers: const {'Accept': 'application/json', 'Content-Type': 'application/json'},
+          ));
+          final response = await refreshDio.post('auth/refresh/', data: {'refresh': refreshToken});
+          final payload = Map<String, dynamic>.from(response.data as Map);
+          final newAccess = payload['access']?.toString();
+          final newRefresh = payload['refresh']?.toString() ?? refreshToken;
+          if (newAccess == null || newAccess.isEmpty) {
+            handler.next(error);
+            return;
+          }
+          await _storage.write(key: 'access', value: newAccess);
+          await _storage.write(key: 'refresh', value: newRefresh);
+          options.extra['driver_refresh_attempted'] = true;
+          options.headers['Authorization'] = 'Bearer $newAccess';
+          final retry = await _dio.fetch<dynamic>(options);
+          handler.resolve(retry);
+        } catch (_) {
+          handler.next(error);
+        }
+      },
     ));
   }
 
