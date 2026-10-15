@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,15 +29,20 @@ class _DriverDashboardState extends State<DriverDashboard> {
   bool _busy = false;
   bool _available = false;
   String? _message;
+  Timer? _foregroundTrackingTimer;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _foregroundTrackingTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      _refreshWhileOnline();
+    });
   }
 
   @override
   void dispose() {
+    _foregroundTrackingTimer?.cancel();
     _plate.dispose();
     _make.dispose();
     _color.dispose();
@@ -71,6 +78,30 @@ class _DriverDashboardState extends State<DriverDashboard> {
       }
     } catch (error) {
       _message = error.toString();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _refreshWhileOnline() async {
+    if (!mounted || _busy) return;
+    final approved = _profile?['is_approved'] == true && _profile?['is_suspended'] != true;
+    final hasActiveWork = _myRides.isNotEmpty || _myParcels.isNotEmpty;
+    if (!approved || (!_available && !hasActiveWork)) return;
+    setState(() => _busy = true);
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 12)),
+      );
+      await widget.api.updateLocation(position.latitude, position.longitude);
+      if (_available) {
+        _rides = await widget.api.availableRides();
+        _parcels = await widget.api.availableParcels();
+      }
+      _myRides = await widget.api.myRides();
+      _myParcels = await widget.api.myParcels();
+    } catch (_) {
+      // Keep the last good screen state if a foreground location refresh fails.
     } finally {
       if (mounted) setState(() => _busy = false);
     }
