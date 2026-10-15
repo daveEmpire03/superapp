@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bokku_mart/core/constants/app_colors.dart';
 import 'package:bokku_mart/core/location/location_service.dart';
+import 'package:bokku_mart/core/network/api_endpoints.dart';
 import 'package:bokku_mart/core/providers/repository_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,7 +114,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
       _quote = null;
     });
     try {
-      final path = _service == 'RIDE' ? 'rides/quote/' : 'parcels/quote/';
+      final path = _service == 'RIDE' ? ApiEndpoints.rideQuote : ApiEndpoints.parcelQuote;
       final response = await ref.read(dioClientProvider).dio.post(
         path,
         data: _payload(),
@@ -140,7 +141,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
       _deliveryCode = null;
     });
     try {
-      final path = _service == 'RIDE' ? 'rides/' : 'parcels/';
+      final path = _service == 'RIDE' ? ApiEndpoints.rides : ApiEndpoints.parcels;
       final response = await ref.read(dioClientProvider).dio.post(
         path,
         data: {..._payload(), 'payment_method': _paymentMethod},
@@ -152,7 +153,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
 
       if (_paymentMethod == 'ONLINE' && _activeServiceId != null) {
         final paymentResponse = await ref.read(dioClientProvider).dio.post(
-          'payments/services/initialize/',
+          ApiEndpoints.servicePaymentInitialize,
           data: {
             'service_type': _service,
             'service_id': _activeServiceId,
@@ -206,7 +207,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
     });
     try {
       final response = await ref.read(dioClientProvider).dio.post(
-        'payments/services/verify/',
+        ApiEndpoints.servicePaymentVerify,
         data: {'transaction_id': _transactionId.text.trim()},
       );
       final body = Map<String, dynamic>.from(response.data as Map);
@@ -229,7 +230,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
 
   Future<void> _refreshHistory() async {
     try {
-      final path = _service == 'RIDE' ? 'rides/' : 'parcels/';
+      final path = _service == 'RIDE' ? ApiEndpoints.rides : ApiEndpoints.parcels;
       final response = await ref.read(dioClientProvider).dio.get(path);
       final body = Map<String, dynamic>.from(response.data as Map);
       final raw = body['results'] ?? body['data'] ?? const [];
@@ -251,7 +252,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
       _error = null;
     });
     try {
-      final path = _service == 'RIDE' ? 'rides/$id/cancel/' : 'parcels/$id/cancel/';
+      final path = _service == 'RIDE' ? ApiEndpoints.rideCancel(id) : ApiEndpoints.parcelCancel(id);
       await ref.read(dioClientProvider).dio.post(path, data: const {});
       await _refreshHistory();
     } catch (error) {
