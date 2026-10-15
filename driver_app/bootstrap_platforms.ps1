@@ -11,7 +11,7 @@ try {
         throw "Flutter platform generation failed with exit code $LASTEXITCODE."
     }
 
-    Copy-Item -Path (Join-Path $GeneratedRoot "android") -Destination $ProjectRoot -Recurse -Force
+    Copy-Item -Path (Join-Path $GeneratedRoot "android") -Destination (Join-Path $ProjectRoot "android") -Recurse -Force
 
     $Manifest = Join-Path $ProjectRoot "android/app/src/main/AndroidManifest.xml"
     $Xml = Get-Content -Path $Manifest -Raw
