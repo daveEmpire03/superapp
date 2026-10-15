@@ -83,28 +83,37 @@ class DriverApi {
   Future<List<Map<String, dynamic>>> availableRides() async =>
       _items((await _dio.get('rides/driver/available/')).data['data']);
 
-  Future<List<Map<String, dynamic>>> myRides() async =>
-      _items((await _dio.get('rides/driver/mine/')).data['results'] ?? (await _dio.get('rides/driver/mine/')).data);
+  Future<List<Map<String, dynamic>>> myRides() async {
+    final response = await _dio.get('rides/driver/mine/');
+    final body = Map<String, dynamic>.from(response.data as Map);
+    return _items(body['results'] ?? body['data']);
+  }
 
   Future<List<Map<String, dynamic>>> availableParcels() async =>
       _items((await _dio.get('parcels/driver/available/')).data['data']);
 
-  Future<List<Map<String, dynamic>>> myParcels() async =>
-      _items((await _dio.get('parcels/driver/mine/')).data['results'] ?? (await _dio.get('parcels/driver/mine/')).data);
+  Future<List<Map<String, dynamic>>> myParcels() async {
+    final response = await _dio.get('parcels/driver/mine/');
+    final body = Map<String, dynamic>.from(response.data as Map);
+    return _items(body['results'] ?? body['data']);
+  }
 
   List<Map<String, dynamic>> _items(dynamic value) {
     if (value is! List) return const [];
     return value.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
   }
 
-  Future<void> acceptRide(String id) async =>
-      _dio.post('rides/$id/accept/', data: const {});
+  Future<void> acceptRide(String id) async {
+    await _dio.post('rides/$id/accept/', data: const {});
+  }
 
-  Future<void> updateRideStatus(String id, String status) async =>
-      _dio.post('rides/$id/status/', data: {'status': status});
+  Future<void> updateRideStatus(String id, String status) async {
+    await _dio.post('rides/$id/status/', data: {'status': status});
+  }
 
-  Future<void> acceptParcel(String id) async =>
-      _dio.post('parcels/$id/accept/', data: const {});
+  Future<void> acceptParcel(String id) async {
+    await _dio.post('parcels/$id/accept/', data: const {});
+  }
 
   Future<void> updateParcelStatus(
     String id,
