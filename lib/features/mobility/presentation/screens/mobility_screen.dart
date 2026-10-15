@@ -98,7 +98,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
     }
   }
 
-  Future<void> _quote() async {
+  Future<void> _calculateQuote() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _busy = true;
@@ -437,7 +437,7 @@ class _MobilityScreenState extends ConsumerState<MobilityScreen> {
                   ],
                   const SizedBox(height: 14),
                   OutlinedButton(
-                    onPressed: _busy ? null : _quote,
+                    onPressed: _busy ? null : _calculateQuote,
                     child: const Text('Calculate fare'),
                   ),
                   const SizedBox(height: 8),
