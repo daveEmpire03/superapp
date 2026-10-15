@@ -1,0 +1,14 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '../lib/screens/driver_app.dart';
+
+void main() {
+  testWidgets('driver app shows a dedicated sign-in screen', (tester) async {
+    await tester.pumpWidget(const BokkuDriverApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bokku Driver'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+  });
+}
