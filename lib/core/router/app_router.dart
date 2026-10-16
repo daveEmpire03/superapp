@@ -1,4 +1,10 @@
 import 'package:bokku_mart/features/auth/presentation/providers/auth_state_provider.dart';
+import 'package:bokku_mart/riders/screens/rider_earnings_screen.dart';
+import 'package:bokku_mart/riders/screens/rider_home_screen.dart';
+import 'package:bokku_mart/riders/screens/rider_job_detail_screen.dart';
+import 'package:bokku_mart/riders/screens/rider_jobs_screen.dart';
+import 'package:bokku_mart/riders/screens/rider_profile_screen.dart';
+import 'package:bokku_mart/riders/screens/rider_shell_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,6 +52,8 @@ import '../../features/mobility/presentation/screens/mobility_screen.dart';
 import '../../features/mobility/presentation/screens/location_picker_screen.dart';
 import '../../features/mobility/presentation/screens/mobility_tracking_screen.dart';
 
+// Rider
+
 // -----------------------------------------------------------------------------
 // Role-aware routing helpers
 // -----------------------------------------------------------------------------
@@ -54,9 +62,8 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
 );
 
-/// Paths that anyone (authenticated or not) can land on.
 const Set<String> _publicPaths = {
-  '/', // splash
+  '/',
   '/onboarding',
   '/signin',
   '/register',
@@ -66,10 +73,8 @@ const Set<String> _publicPaths = {
   '/reset-password',
 };
 
-/// Paths that are reachable by every authenticated role, regardless of role.
 const Set<String> _sharedPaths = {'/change-password', '/notifications'};
 
-/// The landing route for a role after login / on cold start.
 String _homeForRole(UserRole role) {
   switch (role) {
     case UserRole.rider:
@@ -78,18 +83,11 @@ String _homeForRole(UserRole role) {
     case UserRole.storeManager:
     case UserRole.staff:
     case UserRole.customer:
-      // Staff/admin trees are not built yet — fall back to customer home.
       return '/home';
   }
 }
 
-/// Is this role allowed to visit this path?
-///
-/// - Rider-only tree:  anything starting with `/rider`
-/// - Shared paths:     allowed for every role
-/// - Everything else:  allowed for every role EXCEPT riders
 bool _isAllowed(UserRole role, String path) {
-  // shared wins first
   for (final shared in _sharedPaths) {
     if (path == shared || path.startsWith('$shared/')) return true;
   }
@@ -116,10 +114,7 @@ class _RouterRefresh extends ChangeNotifier {
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh();
 
-  // Whenever auth state changes (login, logout, role change),
-  // tell GoRouter to re-run `redirect`.
   ref.listen<AuthState>(authStateProvider, (_, __) => refresh.notify());
-
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
@@ -132,101 +127,68 @@ final routerProvider = Provider<GoRouter>((ref) {
       final path = state.matchedLocation;
       final isPublicPath = _publicPaths.contains(path);
 
-      // --- Unauthenticated -----------------------------------------------
       if (authState is Unauthenticated) {
-        // Splash is done checking → push to signin.
         if (path == '/') return '/signin';
-
-        // Other public pages (register, verify-email, forgot-password, etc.)
-        // are reachable without auth.
         if (isPublicPath) return null;
-
-        // Any protected path → signin.
         return '/signin';
       }
 
-      // --- Authenticated -------------------------------------------------
       if (authState is Authenticated) {
-        final user = authState.user;
-        final role = user.roleEnum;
+        final role = authState.user.roleEnum;
         final home = _homeForRole(role);
 
-        // Authenticated user landing on a public page → send to their home.
         if (isPublicPath) return home;
-
-        // Cross-role access → send back to their home.
         if (!_isAllowed(role, path)) return home;
       }
 
-      // AuthInitial / AuthLoading / AuthError / PasswordChangeSuccess etc.:
-      // don't interfere — let the current screen handle it.
       return null;
     },
     routes: [
       GoRoute(
         path: '/',
         name: RouteNames.splash,
-        builder: (context, state) {
-          return const SplashScreen();
-        },
+        builder: (context, state) => const SplashScreen(),
       ),
 
       GoRoute(
         path: '/onboarding',
         name: RouteNames.onboarding,
-        builder: (context, state) {
-          return const OnboardingScreen();
-        },
+        builder: (context, state) => const OnboardingScreen(),
       ),
 
-      // ---------------------------------------------------------------------
-      // Authentication
-      // ---------------------------------------------------------------------
+      // ---------------- Auth ----------------
       GoRoute(
         path: '/signin',
         name: RouteNames.signIn,
-        builder: (context, state) {
-          return const SignInScreen();
-        },
+        builder: (context, state) => const SignInScreen(),
       ),
-
       GoRoute(
         path: '/register',
         name: RouteNames.register,
-        builder: (context, state) {
-          return const RegisterScreen();
-        },
+        builder: (context, state) => const RegisterScreen(),
       ),
-
       GoRoute(
         path: '/verify-email',
         name: RouteNames.verifyEmail,
         builder: (context, state) {
           final email = state.uri.queryParameters['email']?.trim() ?? '';
           final emailSent = state.uri.queryParameters['sent'] != 'false';
-
           return VerifyEmailScreen(email: email, initialEmailSent: emailSent);
         },
       ),
-
       GoRoute(
         path: '/forgot-password',
         name: RouteNames.forgotPassword,
-        builder: (context, state) {
-          return const ForgotPasswordScreen();
-        },
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
-
       GoRoute(
         path: '/verify-password-reset',
         name: RouteNames.verifyPasswordReset,
         builder: (context, state) {
           final email = state.uri.queryParameters['email']?.trim() ?? '';
-
           return VerifyPasswordResetScreen(email: email);
         },
       ),
-
       GoRoute(
         path: '/reset-password',
         name: RouteNames.resetPassword,
@@ -235,87 +197,64 @@ final routerProvider = Provider<GoRouter>((ref) {
           final resetToken = state.extra is String
               ? state.extra! as String
               : '';
-
           return ResetPasswordScreen(email: email, resetToken: resetToken);
         },
       ),
-
       GoRoute(
         path: '/change-password',
         name: RouteNames.changePassword,
-        builder: (context, state) {
-          return const ChangePasswordScreen();
-        },
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
 
-      // ---------------------------------------------------------------------
-      // Catalog
-      // ---------------------------------------------------------------------
+      // ---------------- Catalog ----------------
       GoRoute(
         path: '/search',
         name: RouteNames.search,
-        builder: (context, state) {
-          return const SearchScreen();
-        },
+        builder: (context, state) => const SearchScreen(),
       ),
-
       GoRoute(
         path: '/product-detail/:id',
         name: RouteNames.productDetail,
         builder: (context, state) {
           final product = state.extra as ProductEntity;
-
           return ProductDetailScreen(product: product);
         },
       ),
 
-      // ---------------------------------------------------------------------
-      // Checkout / Orders
-      // ---------------------------------------------------------------------
+      // ---------------- Checkout / Orders ----------------
       GoRoute(
         path: '/checkout',
         name: RouteNames.checkout,
-        builder: (context, state) {
-          return const CheckoutScreen();
-        },
+        builder: (context, state) => const CheckoutScreen(),
       ),
-
       GoRoute(
         path: '/order-success',
         name: RouteNames.orderSuccess,
         builder: (context, state) {
           final order = state.extra as OrderEntity;
-
           return OrderSuccessScreen(order: order);
         },
       ),
-
       GoRoute(
         path: '/order-tracking/:id',
         name: RouteNames.orderTracking,
         builder: (context, state) {
           final order = state.extra as OrderEntity;
-
           return OrderTrackingScreen(order: order);
         },
       ),
-
       GoRoute(
         path: '/orders',
         name: RouteNames.orders,
-        builder: (context, state) {
-          return const OrdersHistoryScreen();
-        },
+        builder: (context, state) => const OrdersHistoryScreen(),
       ),
-
       GoRoute(
         path: '/notifications',
         name: RouteNames.notifications,
-        builder: (context, state) {
-          return const NotificationsScreen();
-        },
+        builder: (context, state) => const NotificationsScreen(),
       ),
 
+      // ---------------- Mobility ----------------
       GoRoute(
         path: '/mobility/tracking',
         name: 'mobilityTracking',
@@ -327,7 +266,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
       GoRoute(
         path: '/location-picker',
         name: 'locationPicker',
@@ -342,44 +280,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
       GoRoute(
         path: '/mobility',
         name: 'mobility',
         builder: (context, state) => const MobilityScreen(),
       ),
 
-      // ---------------------------------------------------------------------
-      // Rider (placeholder tree — real screens come later)
-      // ---------------------------------------------------------------------
+      // ---------------- Rider detail (outside shell — full screen) ----------------
       GoRoute(
-        path: '/rider/home',
-        name: 'riderHome',
-        builder: (context, state) =>
-            const _RiderPlaceholderScreen(title: 'Rider Home'),
-      ),
-      GoRoute(
-        path: '/rider/jobs',
-        name: 'riderJobs',
-        builder: (context, state) =>
-            const _RiderPlaceholderScreen(title: 'Rider Jobs'),
-      ),
-      GoRoute(
-        path: '/rider/earnings',
-        name: 'riderEarnings',
-        builder: (context, state) =>
-            const _RiderPlaceholderScreen(title: 'Rider Earnings'),
-      ),
-      GoRoute(
-        path: '/rider/profile',
-        name: 'riderProfile',
-        builder: (context, state) =>
-            const _RiderPlaceholderScreen(title: 'Rider Profile'),
+        path: '/rider/jobs/:id',
+        name: 'riderJobDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return RiderJobDetailScreen(jobId: id);
+        },
       ),
 
-      // ---------------------------------------------------------------------
-      // Persistent Navigation (customer shell)
-      // ---------------------------------------------------------------------
+      // ---------------- Customer shell ----------------
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShellScreen(navigationShell: navigationShell);
@@ -390,9 +307,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 name: RouteNames.home,
-                builder: (context, state) {
-                  return const HomeScreen();
-                },
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),
@@ -401,9 +316,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/categories',
                 name: RouteNames.categories,
-                builder: (context, state) {
-                  return const CategoriesScreen();
-                },
+                builder: (context, state) => const CategoriesScreen(),
               ),
             ],
           ),
@@ -412,9 +325,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/deals',
                 name: RouteNames.deals,
-                builder: (context, state) {
-                  return const DealsScreen();
-                },
+                builder: (context, state) => const DealsScreen(),
               ),
             ],
           ),
@@ -423,9 +334,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/cart',
                 name: RouteNames.cart,
-                builder: (context, state) {
-                  return const CartScreen();
-                },
+                builder: (context, state) => const CartScreen(),
               ),
             ],
           ),
@@ -434,9 +343,52 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/account',
                 name: RouteNames.account,
-                builder: (context, state) {
-                  return const ProfileScreen();
-                },
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // ---------------- Rider shell ----------------
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return RiderShellScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/rider/home',
+                name: 'riderHome',
+                builder: (context, state) => const RiderHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/rider/jobs',
+                name: 'riderJobs',
+                builder: (context, state) => const RiderJobsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/rider/earnings',
+                name: 'riderEarnings',
+                builder: (context, state) => const RiderEarningsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/rider/profile',
+                name: 'riderProfile',
+                builder: (context, state) => const RiderProfileScreen(),
               ),
             ],
           ),
@@ -445,26 +397,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-// -----------------------------------------------------------------------------
-// Temporary rider placeholder — will be replaced by real screens in Step 6.
-// -----------------------------------------------------------------------------
-
-class _RiderPlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _RiderPlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          '$title — coming soon',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      ),
-    );
-  }
-}

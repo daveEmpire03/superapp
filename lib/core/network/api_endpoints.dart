@@ -41,9 +41,7 @@ class ApiEndpoints {
 
   static const String addresses = 'auth/addresses/';
 
-  static String addressDetail(
-    Object addressId,
-  ) {
+  static String addressDetail(Object addressId) {
     return 'auth/addresses/$addressId/';
   }
 
@@ -53,9 +51,7 @@ class ApiEndpoints {
 
   static const String stores = 'stores/';
 
-  static String storeDetail(
-    Object storeId,
-  ) {
+  static String storeDetail(Object storeId) {
     return 'stores/$storeId/';
   }
 
@@ -68,9 +64,7 @@ class ApiEndpoints {
   static const String deals = 'catalog/products/deals/';
   static const String search = 'catalog/products/search/';
 
-  static String productDetail(
-    Object productId,
-  ) {
+  static String productDetail(Object productId) {
     return 'catalog/products/$productId/';
   }
 
@@ -89,15 +83,11 @@ class ApiEndpoints {
   static const String clearCart = 'cart/clear/';
   static const String validateCart = 'cart/validate/';
 
-  static String cartItem(
-    Object itemId,
-  ) {
+  static String cartItem(Object itemId) {
     return 'cart/items/$itemId/';
   }
 
-  static String removeCartItem(
-    Object itemId,
-  ) {
+  static String removeCartItem(Object itemId) {
     return 'cart/items/$itemId/remove/';
   }
 
@@ -108,9 +98,7 @@ class ApiEndpoints {
   static const String orders = 'orders/';
   static const String checkout = 'orders/checkout/';
 
-  static String orderDetail(
-    Object orderId,
-  ) {
+  static String orderDetail(Object orderId) {
     return 'orders/$orderId/';
   }
 
@@ -125,10 +113,17 @@ class ApiEndpoints {
   // Delivery
   // ---------------------------------------------------------------------------
 
-  static String deliveryDetail(
-    Object deliveryId,
-  ) {
+  /// Customer-facing delivery detail.
+  static String deliveryDetail(Object deliveryId) {
     return 'delivery/$deliveryId/';
+  }
+
+  /// Rider's list of assigned deliveries.
+  static const String riderDeliveries = 'delivery/rider/mine/';
+
+  /// Rider updating a specific delivery's status.
+  static String riderDeliveryStatus(Object deliveryId) {
+    return 'delivery/rider/$deliveryId/status/';
   }
 
   // ---------------------------------------------------------------------------
@@ -139,7 +134,8 @@ class ApiEndpoints {
   static const String rideQuote = 'rides/quote/';
   static const String parcels = 'parcels/';
   static const String parcelQuote = 'parcels/quote/';
-  static const String servicePaymentInitialize = 'payments/services/initialize/';
+  static const String servicePaymentInitialize =
+      'payments/services/initialize/';
   static const String servicePaymentVerify = 'payments/services/verify/';
 
   static String rideCancel(Object rideId) => 'rides/$rideId/cancel/';
@@ -169,21 +165,15 @@ class ApiEndpoints {
 
   static const String reviews = 'reviews/';
 
-  static String productReviews(
-    Object productId,
-  ) {
+  static String productReviews(Object productId) {
     return 'reviews/products/$productId/';
   }
 
-  static String productReviewSummary(
-    Object productId,
-  ) {
+  static String productReviewSummary(Object productId) {
     return 'reviews/products/$productId/summary/';
   }
 
-  static String reviewEligibility(
-    Object productId,
-  ) {
+  static String reviewEligibility(Object productId) {
     return 'reviews/products/$productId/eligibility/';
   }
 
@@ -193,15 +183,11 @@ class ApiEndpoints {
 
   static const String supportTickets = 'support/';
 
-  static String supportTicket(
-    Object ticketId,
-  ) {
+  static String supportTicket(Object ticketId) {
     return 'support/$ticketId/';
   }
 
-  static String supportTicketReply(
-    Object ticketId,
-  ) {
+  static String supportTicketReply(Object ticketId) {
     return 'support/$ticketId/reply/';
   }
 }

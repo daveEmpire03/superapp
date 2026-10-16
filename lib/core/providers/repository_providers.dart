@@ -1,3 +1,4 @@
+import 'package:bokku_mart/riders/repositories/rider_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../di/injection_container.dart';
@@ -15,18 +16,28 @@ import '../../features/stores/data/repositories/store_repository.dart';
 /// Existing repositories are owned by GetIt. Riverpod bridges to them
 /// without disposing them, preventing duplicate network clients or token stores.
 final dioClientProvider = Provider<DioClient>((ref) => sl<DioClient>());
-final authTokenStorageProvider =
-    Provider<AuthTokenStorage>((ref) => sl<AuthTokenStorage>());
-final locationServiceProvider =
-    Provider<LocationService>((ref) => sl<LocationService>());
+final authTokenStorageProvider = Provider<AuthTokenStorage>(
+  (ref) => sl<AuthTokenStorage>(),
+);
+final locationServiceProvider = Provider<LocationService>(
+  (ref) => sl<LocationService>(),
+);
 
-final authRepositoryProvider =
-    Provider<AuthRepository>((ref) => sl<AuthRepository>());
-final productRepositoryProvider =
-    Provider<ProductRepository>((ref) => sl<ProductRepository>());
-final cartRepositoryProvider =
-    Provider<CartRepository>((ref) => sl<CartRepository>());
-final orderRepositoryProvider =
-    Provider<OrderRepository>((ref) => sl<OrderRepository>());
-final storeRepositoryProvider =
-    Provider<StoreRepository>((ref) => sl<StoreRepository>());
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => sl<AuthRepository>(),
+);
+final productRepositoryProvider = Provider<ProductRepository>(
+  (ref) => sl<ProductRepository>(),
+);
+final cartRepositoryProvider = Provider<CartRepository>(
+  (ref) => sl<CartRepository>(),
+);
+final orderRepositoryProvider = Provider<OrderRepository>(
+  (ref) => sl<OrderRepository>(),
+);
+final storeRepositoryProvider = Provider<StoreRepository>(
+  (ref) => sl<StoreRepository>(),
+);
+final riderRepositoryProvider = Provider<RiderRepository>(
+  (ref) => sl<RiderRepository>(),
+);

@@ -1,4 +1,7 @@
 import 'package:bokku_mart/features/cart/data/datasources/cart_remote_data_source.dart';
+import 'package:bokku_mart/riders/data/datasources/rider_remote_data_source.dart';
+import 'package:bokku_mart/riders/data/datasources/rider_repository_impl.dart';
+import 'package:bokku_mart/riders/repositories/rider_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,40 +35,32 @@ import '../../features/stores/data/datasources/store_remote_data_source.dart';
 import '../../features/stores/data/repositories/store_repository.dart';
 import '../../features/stores/data/repositories/store_repository_impl.dart';
 
+// Rider
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
 
-  sl.registerLazySingleton<SharedPreferences>(
-    () => sharedPreferences,
-  );
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
 
   sl.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
   );
 
   sl.registerLazySingleton<AuthTokenStorage>(
-    () => AuthTokenStorage(
-      secureStorage: sl<FlutterSecureStorage>(),
-    ),
+    () => AuthTokenStorage(secureStorage: sl<FlutterSecureStorage>()),
   );
 
   sl.registerLazySingleton<DioClient>(
-    () => DioClient(
-      tokenStorage: sl<AuthTokenStorage>(),
-    ),
+    () => DioClient(tokenStorage: sl<AuthTokenStorage>()),
   );
 
-  sl.registerLazySingleton<LocationService>(
-    () => LocationServiceImpl(),
-  );
+  sl.registerLazySingleton<LocationService>(() => LocationServiceImpl());
 
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(
-      dioClient: sl<DioClient>(),
-    ),
+    () => AuthRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   sl.registerLazySingleton<AuthRepository>(
@@ -75,60 +70,41 @@ Future<void> initDependencies() async {
     ),
   );
 
-
   // Catalog
   sl.registerLazySingleton<ProductRemoteDataSource>(
-    () => ProductRemoteDataSourceImpl(
-      dioClient: sl<DioClient>(),
-    ),
+    () => ProductRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(
-      remoteDataSource: sl<ProductRemoteDataSource>(),
-    ),
+    () =>
+        ProductRepositoryImpl(remoteDataSource: sl<ProductRemoteDataSource>()),
   );
-
 
   // Cart
   sl.registerLazySingleton<CartRemoteDataSource>(
-    () => CartRemoteDataSourceImpl(
-      dioClient: sl<DioClient>(),
-    ),
+    () => CartRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   sl.registerLazySingleton<CartRepository>(
-    () => CartRepositoryImpl(
-      remoteDataSource: sl<CartRemoteDataSource>(),
-    ),
+    () => CartRepositoryImpl(remoteDataSource: sl<CartRemoteDataSource>()),
   );
-
 
   // Checkout
   sl.registerLazySingleton<OrderRemoteDataSource>(
-    () => OrderRemoteDataSourceImpl(
-      dioClient: sl<DioClient>(),
-    ),
+    () => OrderRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   sl.registerLazySingleton<OrderRepository>(
-    () => OrderRepositoryImpl(
-      remoteDataSource: sl<OrderRemoteDataSource>(),
-    ),
+    () => OrderRepositoryImpl(remoteDataSource: sl<OrderRemoteDataSource>()),
   );
-
 
   // Stores
   sl.registerLazySingleton<StoreRemoteDataSource>(
-    () => StoreRemoteDataSourceImpl(
-      dioClient: sl<DioClient>(),
-    ),
+    () => StoreRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   sl.registerLazySingleton<StoreLocalDataSource>(
-    () => StoreLocalDataSourceImpl(
-      sharedPreferences: sl<SharedPreferences>(),
-    ),
+    () => StoreLocalDataSourceImpl(sharedPreferences: sl<SharedPreferences>()),
   );
 
   sl.registerLazySingleton<StoreRepository>(
@@ -138,4 +114,12 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // Rider
+  sl.registerLazySingleton<RiderRemoteDataSource>(
+    () => RiderRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
+  sl.registerLazySingleton<RiderRepository>(
+    () => RiderRepositoryImpl(remoteDataSource: sl<RiderRemoteDataSource>()),
+  );
 }
