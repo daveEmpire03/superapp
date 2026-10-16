@@ -9,9 +9,7 @@ import '../../../../core/router/route_names.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({
-    super.key,
-  });
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +17,7 @@ class ProfileScreen extends StatelessWidget {
       provider: authStateProvider,
       listener: (context, state) {
         if (state is Unauthenticated) {
-          context.goNamed(
-            RouteNames.signIn,
-          );
+          context.goNamed(RouteNames.signIn);
         }
       },
       child: Scaffold(
@@ -42,22 +38,18 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         body: RiverpodBuilder<AuthState>(
-      provider: authStateProvider,
+          provider: authStateProvider,
           builder: (context, state) {
             if (state is AuthLoading) {
               return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
+                child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
 
             if (state is! Authenticated) {
               return _SignedOutView(
                 onSignIn: () {
-                  context.goNamed(
-                    RouteNames.signIn,
-                  );
+                  context.goNamed(RouteNames.signIn);
                 },
               );
             }
@@ -75,18 +67,14 @@ class ProfileScreen extends StatelessWidget {
             return RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
-                await ProviderScope.containerOf(context, listen: false)
-                    .read(authStateProvider.notifier)
-                    .checkAuthStatus();
+                await ProviderScope.containerOf(
+                  context,
+                  listen: false,
+                ).read(authStateProvider.notifier).checkAuthStatus();
               },
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  18,
-                  8,
-                  18,
-                  36,
-                ),
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 36),
                 children: [
                   _ProfileHeader(
                     name: fullName,
@@ -101,9 +89,7 @@ class ProfileScreen extends StatelessWidget {
                     isPhoneVerified: user.isPhoneVerified,
                   ),
                   const SizedBox(height: 28),
-                  const _SectionHeader(
-                    title: 'Shopping',
-                  ),
+                  const _SectionHeader(title: 'Shopping'),
                   const SizedBox(height: 10),
                   _SettingsCard(
                     children: [
@@ -112,9 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         title: 'My Orders',
                         subtitle: 'Track, review and manage your orders',
                         onTap: () {
-                          context.pushNamed(
-                            RouteNames.orders,
-                          );
+                          context.pushNamed(RouteNames.orders);
                         },
                       ),
                       const _MenuDivider(),
@@ -123,17 +107,13 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Notifications',
                         subtitle: 'View order and account notifications',
                         onTap: () {
-                          context.pushNamed(
-                            RouteNames.notifications,
-                          );
+                          context.pushNamed(RouteNames.notifications);
                         },
                       ),
                     ],
                   ),
                   const SizedBox(height: 26),
-                  const _SectionHeader(
-                    title: 'Security',
-                  ),
+                  const _SectionHeader(title: 'Security'),
                   const SizedBox(height: 10),
                   _SettingsCard(
                     children: [
@@ -142,17 +122,13 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Change Password',
                         subtitle: 'Update the password for your account',
                         onTap: () {
-                          context.pushNamed(
-                            RouteNames.changePassword,
-                          );
+                          context.pushNamed(RouteNames.changePassword);
                         },
                       ),
                     ],
                   ),
                   const SizedBox(height: 26),
-                  const _SectionHeader(
-                    title: 'Support',
-                  ),
+                  const _SectionHeader(title: 'Support'),
                   const SizedBox(height: 10),
                   _SettingsCard(
                     children: [
@@ -172,14 +148,9 @@ class ProfileScreen extends StatelessWidget {
                     height: 54,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        _showSignOutDialog(
-                          context,
-                        );
+                        _showSignOutDialog(context);
                       },
-                      icon: const Icon(
-                        Icons.logout_rounded,
-                        size: 19,
-                      ),
+                      icon: const Icon(Icons.logout_rounded, size: 19),
                       label: const Text(
                         'Sign Out',
                         style: TextStyle(
@@ -194,9 +165,7 @@ class ProfileScreen extends StatelessWidget {
                           width: 1.2,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            17,
-                          ),
+                          borderRadius: BorderRadius.circular(17),
                         ),
                       ),
                     ),
@@ -221,129 +190,106 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showSignOutDialog(
-    BuildContext context,
-  ) async {
+  Future<void> _showSignOutDialog(BuildContext context) async {
     final shouldSignOut = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         return Container(
           margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.fromLTRB(
-            22,
-            10,
-            22,
-            24,
-          ),
+          padding: const EdgeInsets.fromLTRB(22, 10, 22, 24),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(
-              28,
-            ),
+            borderRadius: BorderRadius.circular(28),
           ),
           child: SafeArea(
             top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  margin: const EdgeInsets.only(
-                    bottom: 24,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(
-                      10,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                ),
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: AppColors.accentRed.withValues(
-                      alpha: 0.08,
+                  Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      color: AppColors.accentRed.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    borderRadius: BorderRadius.circular(
-                      20,
+                    child: const Icon(
+                      Icons.logout_rounded,
+                      color: AppColors.accentRed,
+                      size: 28,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.logout_rounded,
-                    color: AppColors.accentRed,
-                    size: 28,
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Sign out?',
+                    style: TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Sign out?',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
+                  const SizedBox(height: 8),
+                  const Text(
+                    'You will need to sign in again to access your Bokku Mart account.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'You will need to sign in again to access your Bokku Mart account.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop(true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: AppColors.accentRed,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'Sign Out',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(
-                        sheetContext,
-                      ).pop(true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: AppColors.accentRed,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          16,
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop(false);
+                      },
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
-                    child: const Text(
-                      'Sign Out',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(
-                        sheetContext,
-                      ).pop(false);
-                    },
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -354,9 +300,10 @@ class ProfileScreen extends StatelessWidget {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false)
-        .read(authStateProvider.notifier)
-        .signOut();
+    ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(authStateProvider.notifier).signOut();
   }
 }
 
@@ -380,26 +327,16 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            AppColors.primaryDark,
-            AppColors.primary,
-          ],
+          colors: [AppColors.primaryDark, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(
-          26,
-        ),
+        borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(
-              alpha: 0.18,
-            ),
+            color: AppColors.primary.withValues(alpha: 0.18),
             blurRadius: 24,
-            offset: const Offset(
-              0,
-              10,
-            ),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -413,9 +350,7 @@ class _ProfileHeader extends StatelessWidget {
                 height: 66,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(
-                    21,
-                  ),
+                  borderRadius: BorderRadius.circular(21),
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -449,9 +384,7 @@ class _ProfileHeader extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withValues(
-                          alpha: 0.78,
-                        ),
+                        color: Colors.white.withValues(alpha: 0.78),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -464,17 +397,10 @@ class _ProfileHeader extends StatelessWidget {
           if (customerId.isNotEmpty) ...[
             const SizedBox(height: 18),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 7,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(
-                  alpha: 0.12,
-                ),
-                borderRadius: BorderRadius.circular(
-                  30,
-                ),
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(30),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -482,9 +408,7 @@ class _ProfileHeader extends StatelessWidget {
                   Icon(
                     Icons.badge_outlined,
                     size: 15,
-                    color: Colors.white.withValues(
-                      alpha: 0.85,
-                    ),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -524,12 +448,8 @@ class _AccountStatusCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          22,
-        ),
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -567,9 +487,7 @@ class _AccountStatusCard extends StatelessWidget {
               padding: const EdgeInsets.all(13),
               decoration: BoxDecoration(
                 color: AppColors.primarySurface,
-                borderRadius: BorderRadius.circular(
-                  14,
-                ),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -626,15 +544,9 @@ class _StatusRow extends StatelessWidget {
           height: 42,
           decoration: BoxDecoration(
             color: AppColors.primarySurface,
-            borderRadius: BorderRadius.circular(
-              13,
-            ),
+            borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: AppColors.primary,
-          ),
+          child: Icon(icon, size: 20, color: AppColors.primary),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -665,20 +577,13 @@ class _StatusRow extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 9,
-            vertical: 5,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
           decoration: BoxDecoration(
             color: verified ? AppColors.primarySurface : AppColors.background,
-            borderRadius: BorderRadius.circular(
-              20,
-            ),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: verified
-                  ? AppColors.primary.withValues(
-                      alpha: 0.25,
-                    )
+                  ? AppColors.primary.withValues(alpha: 0.25)
                   : AppColors.border,
             ),
           ),
@@ -710,9 +615,7 @@ class _StatusRow extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String title;
 
-  const _SectionHeader({
-    required this.title,
-  });
+  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -730,25 +633,17 @@ class _SectionHeader extends StatelessWidget {
 class _SettingsCard extends StatelessWidget {
   final List<Widget> children;
 
-  const _SettingsCard({
-    required this.children,
-  });
+  const _SettingsCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          20,
-        ),
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -769,24 +664,15 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 5,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       leading: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
           color: AppColors.primarySurface,
-          borderRadius: BorderRadius.circular(
-            14,
-          ),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(
-          icon,
-          size: 21,
-          color: AppColors.primary,
-        ),
+        child: Icon(icon, size: 21, color: AppColors.primary),
       ),
       title: Text(
         title,
@@ -797,9 +683,7 @@ class _SettingsTile extends StatelessWidget {
         ),
       ),
       subtitle: Padding(
-        padding: const EdgeInsets.only(
-          top: 2,
-        ),
+        padding: const EdgeInsets.only(top: 2),
         child: Text(
           subtitle,
           style: const TextStyle(
@@ -825,15 +709,8 @@ class _MenuDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 74,
-      ),
-      child: Divider(
-        height: 1,
-        color: AppColors.border.withValues(
-          alpha: 0.8,
-        ),
-      ),
+      padding: const EdgeInsets.only(left: 74),
+      child: Divider(height: 1, color: AppColors.border.withValues(alpha: 0.8)),
     );
   }
 }
@@ -841,19 +718,15 @@ class _MenuDivider extends StatelessWidget {
 class _SignedOutView extends StatelessWidget {
   final VoidCallback onSignIn;
 
-  const _SignedOutView({
-    required this.onSignIn,
-  });
+  const _SignedOutView({required this.onSignIn});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 400,
-          ),
+          constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -862,9 +735,7 @@ class _SignedOutView extends StatelessWidget {
                 height: 86,
                 decoration: BoxDecoration(
                   color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(
-                    28,
-                  ),
+                  borderRadius: BorderRadius.circular(28),
                 ),
                 child: const Icon(
                   Icons.person_outline_rounded,
@@ -903,17 +774,12 @@ class _SignedOutView extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        17,
-                      ),
+                      borderRadius: BorderRadius.circular(17),
                     ),
                   ),
                   child: const Text(
                     'Sign In',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                   ),
                 ),
               ),
