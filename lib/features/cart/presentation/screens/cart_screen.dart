@@ -9,7 +9,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../domain/entities/cart_item_entity.dart';
-import '../bloc/cart_event.dart';
 import '../bloc/cart_state.dart';
 
 class CartScreen extends StatelessWidget {
@@ -67,9 +66,9 @@ class CartScreen extends StatelessWidget {
             return _CartErrorView(
               message: state.message,
               onRetry: () {
-                ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                      const LoadCartEvent(),
-                    );
+                ProviderScope.containerOf(context, listen: false)
+                    .read(cartStateProvider.notifier)
+                    .loadCart();
               },
             );
           }
@@ -112,9 +111,9 @@ class CartScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(dialogContext);
 
-                ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                      const ClearCartEvent(),
-                    );
+                ProviderScope.containerOf(context, listen: false)
+                    .read(cartStateProvider.notifier)
+                    .clearCart();
               },
               child: const Text(
                 'Clear',
@@ -435,11 +434,11 @@ class _QuantityStepper extends StatelessWidget {
                   : AppColors.textPrimary,
             ),
             onPressed: () {
-              ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                    UpdateCartQuantityEvent(
-                      item.id,
-                      item.quantity - 1,
-                    ),
+              ProviderScope.containerOf(context, listen: false)
+                  .read(cartStateProvider.notifier)
+                  .updateCartQuantity(
+                    item.id,
+                    item.quantity - 1,
                   );
             },
           ),
@@ -464,11 +463,11 @@ class _QuantityStepper extends StatelessWidget {
             ),
             onPressed: item.canIncrement
                 ? () {
-                    ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                          UpdateCartQuantityEvent(
-                            item.id,
-                            item.quantity + 1,
-                          ),
+                    ProviderScope.containerOf(context, listen: false)
+                        .read(cartStateProvider.notifier)
+                        .updateCartQuantity(
+                          item.id,
+                          item.quantity + 1,
                         );
                   }
                 : null,

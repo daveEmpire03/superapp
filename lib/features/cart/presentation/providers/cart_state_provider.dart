@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/cart_repository.dart';
-import '../bloc/cart_event.dart';
 import '../bloc/cart_state.dart';
 import '../../domain/entities/cart_entity.dart';
-
-typedef Emitter<T> = void Function(T value);
 
 final cartStateProvider = NotifierProvider<CartController, CartState>(
   CartController.new,
@@ -17,58 +14,33 @@ class CartController extends Notifier<CartState> {
   @override
   CartState build() => const CartInitial();
 
-  void _emit(CartState value) { state = value; }
-
-  Future<void> add(CartEvent event) async {
-    if (event is LoadCartEvent) {
-      await _onLoadCart(event, _emit);
-    }     else if (event is AddToCartEvent) {
-      await _onAddToCart(event, _emit);
-    }     else if (event is ConfirmStoreChangeEvent) {
-      await _onConfirmStoreChange(event, _emit);
-    }     else if (event is CancelStoreChangeEvent) {
-      await _onCancelStoreChange(event, _emit);
-    }     else if (event is UpdateCartQuantityEvent) {
-      await _onUpdateCartQuantity(event, _emit);
-    }     else if (event is RemoveFromCartEvent) {
-      await _onRemoveFromCart(event, _emit);
-    }     else if (event is ClearCartEvent) {
-      await _onClearCart(event, _emit);
-    }
-  }
-
-  Future<void> _onLoadCart(
-    LoadCartEvent event,
-    Emitter<CartState> emit,
-  ) async {
-    emit(const CartLoading());
+  Future<void> loadCart() async {
+    state = const CartLoading();
 
     try {
       final cart = await cartRepository.getCart();
 
-      emit(
-        CartLoaded(
-          cart: cart,
-        ),
+      state = CartLoaded(
+        cart: cart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onAddToCart(
-    AddToCartEvent event,
-    Emitter<CartState> emit,
-  ) async {
-    if (event.inventoryId.trim().isEmpty) {
+  Future<void> addToCart({
+    required String inventoryId,
+    required String? storeId,
+    String? productName,
+    int quantity = 1,
+  }) async {
+    if (inventoryId.trim().isEmpty) {
       return;
     }
 
-    if (event.quantity <= 0) {
+    if (quantity <= 0) {
       return;
     }
 
@@ -77,50 +49,46 @@ class CartController extends Notifier<CartState> {
 
       if (_hasStoreConflict(
         currentCart,
-        event.storeId,
+        storeId,
       )) {
-        emit(
-          CartStoreConflict(
-            currentCart: currentCart,
-            pendingInventoryId: event.inventoryId,
-            pendingProductName: event.productName,
-            pendingQuantity: event.quantity,
-            currentStoreId: currentCart.storeId,
-            newStoreId: event.storeId,
-          ),
+        state = CartStoreConflict(
+          currentCart: currentCart,
+          pendingInventoryId: inventoryId,
+          pendingProductName: productName,
+          pendingQuantity: quantity,
+          currentStoreId: currentCart.storeId,
+          newStoreId: storeId,
         );
 
         return;
       }
 
       final updatedCart = await cartRepository.addItem(
-        inventoryId: event.inventoryId,
-        quantity: event.quantity,
+        inventoryId: inventoryId,
+        quantity: quantity,
       );
 
-      emit(
-        CartLoaded(
-          cart: updatedCart,
-        ),
+      state = CartLoaded(
+        cart: updatedCart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onConfirmStoreChange(
-    ConfirmStoreChangeEvent event,
-    Emitter<CartState> emit,
-  ) async {
-    if (event.inventoryId.trim().isEmpty) {
+  Future<void> confirmStoreChange({
+    required String inventoryId,
+    required String? storeId,
+    String? productName,
+    required int quantity,
+  }) async {
+    if (inventoryId.trim().isEmpty) {
       return;
     }
 
-    if (event.quantity <= 0) {
+    if (quantity <= 0) {
       return;
     }
 
@@ -130,128 +98,101 @@ class CartController extends Notifier<CartState> {
       await cartRepository.clearCart();
 
       final updatedCart = await cartRepository.addItem(
-        inventoryId: event.inventoryId,
-        quantity: event.quantity,
+        inventoryId: inventoryId,
+        quantity: quantity,
       );
 
-      emit(
-        CartLoaded(
-          cart: updatedCart,
-        ),
+      state = CartLoaded(
+        cart: updatedCart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onCancelStoreChange(
-    CancelStoreChangeEvent event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> cancelStoreChange() async {
     try {
       final cart = await cartRepository.getCart();
 
-      emit(
-        CartLoaded(
-          cart: cart,
-        ),
+      state = CartLoaded(
+        cart: cart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onUpdateCartQuantity(
-    UpdateCartQuantityEvent event,
-    Emitter<CartState> emit,
+  Future<void> updateCartQuantity(
+    String cartItemId,
+    int quantity,
   ) async {
-    if (event.cartItemId.trim().isEmpty) {
+    if (cartItemId.trim().isEmpty) {
       return;
     }
 
     try {
       late final CartEntity updatedCart;
 
-      if (event.quantity <= 0) {
+      if (quantity <= 0) {
         updatedCart = await cartRepository.removeItem(
-          cartItemId: event.cartItemId,
+          cartItemId: cartItemId,
         );
       } else {
         updatedCart = await cartRepository.updateQuantity(
-          cartItemId: event.cartItemId,
-          quantity: event.quantity,
+          cartItemId: cartItemId,
+          quantity: quantity,
         );
       }
 
-      emit(
-        CartLoaded(
-          cart: updatedCart,
-        ),
+      state = CartLoaded(
+        cart: updatedCart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onRemoveFromCart(
-    RemoveFromCartEvent event,
-    Emitter<CartState> emit,
-  ) async {
-    if (event.cartItemId.trim().isEmpty) {
+  Future<void> removeFromCart(String cartItemId) async {
+    if (cartItemId.trim().isEmpty) {
       return;
     }
 
     try {
       final updatedCart = await cartRepository.removeItem(
-        cartItemId: event.cartItemId,
+        cartItemId: cartItemId,
       );
 
-      emit(
-        CartLoaded(
-          cart: updatedCart,
-        ),
+      state = CartLoaded(
+        cart: updatedCart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
 
-  Future<void> _onClearCart(
-    ClearCartEvent event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> clearCart() async {
     try {
       final updatedCart = await cartRepository.clearCart();
 
-      emit(
-        CartLoaded(
-          cart: updatedCart,
-        ),
+      state = CartLoaded(
+        cart: updatedCart,
       );
     } catch (error) {
-      emit(
-        CartError(
-          _errorMessage(error),
-        ),
+      state = CartError(
+        _errorMessage(error),
       );
     }
   }
+
+
 
   Future<CartEntity> _getCurrentCart() async {
     final currentState = state;

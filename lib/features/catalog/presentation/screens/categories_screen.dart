@@ -3,7 +3,6 @@ import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
 import '../widgets/product_card.dart';
 
@@ -45,8 +44,9 @@ class CategoriesScreen extends StatelessWidget {
 
                     return InkWell(
                       onTap: () {
-                        ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier)
-                            .add(FilterByCategoryEvent(cat.id));
+                        ProviderScope.containerOf(context, listen: false)
+                            .read(productStateProvider.notifier)
+                            .filterByCategory(cat.id);
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -112,8 +112,9 @@ class CategoriesScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               ElevatedButton(
                                 onPressed: () {
-                                  ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier).add(
-                                      const FilterByCategoryEvent('groceries'));
+                                  ProviderScope.containerOf(context, listen: false)
+                                      .read(productStateProvider.notifier)
+                                      .filterByCategory('groceries');
                                 },
                                 child: const Text('View Groceries'),
                               ),

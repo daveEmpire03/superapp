@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -82,12 +81,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          ResetPasswordSubmittedEvent(
-            resetToken: widget.resetToken,
-            newPassword: _passwordController.text,
-            confirmPassword: _confirmPasswordController.text,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .resetPassword(
+          resetToken: widget.resetToken,
+          newPassword: _passwordController.text,
+          confirmPassword: _confirmPasswordController.text,
         );
   }
 

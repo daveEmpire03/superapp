@@ -10,11 +10,10 @@ import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/checkout/domain/repositories/order_repository.dart';
 import '../../features/stores/data/repositories/store_repository.dart';
 
-/// Temporary infrastructure bridge during the incremental BLoC migration.
+/// Infrastructure and repository providers for Riverpod.
 ///
-/// Existing repositories are owned by GetIt. Riverpod must not dispose them.
-/// Replace each bridge provider with a Riverpod-owned factory when its feature
-/// migrates; this prevents creating duplicate network clients or token stores.
+/// Existing repositories are owned by GetIt. Riverpod bridges to them
+/// without disposing them, preventing duplicate network clients or token stores.
 final dioClientProvider = Provider<DioClient>((ref) => sl<DioClient>());
 final authTokenStorageProvider =
     Provider<AuthTokenStorage>((ref) => sl<AuthTokenStorage>());

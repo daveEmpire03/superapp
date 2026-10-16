@@ -6,8 +6,8 @@ typedef StateChanged<T> = void Function(BuildContext context, T state);
 typedef StateWidgetBuilder<T> = Widget Function(BuildContext context, T state);
 typedef StatePredicate<T> = bool Function(T previous, T current);
 
-/// Stateless bridge for the existing UI while BLoC is removed.
-/// These widgets only use Riverpod; they do not instantiate BLoCs.
+/// Riverpod UI helper components (RiverpodBuilder, RiverpodListener, RiverpodConsumer).
+/// Clean declarative widgets providing scoped reactive rebuilds and side-effect listeners.
 class RiverpodBuilder<T> extends ConsumerWidget {
   const RiverpodBuilder({
     super.key,

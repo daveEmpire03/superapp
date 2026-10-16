@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../core/error/exceptions.dart';
-
-typedef Emitter<T> = void Function(T value);
 
 final authStateProvider = NotifierProvider<AuthController, AuthState>(
   AuthController.new,
@@ -17,345 +14,223 @@ class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() => const AuthInitial();
 
-  void _emit(AuthState value) { state = value; }
-
-  Future<void> add(AuthEvent event) async {
-    if (event is CheckAuthStatusEvent) {
-      await _onCheckAuthStatus(event, _emit);
-    }     else if (event is SignInSubmittedEvent) {
-      await _onSignInSubmitted(event, _emit);
-    }     else if (event is RegisterSubmittedEvent) {
-      await _onRegisterSubmitted(event, _emit);
-    }     else if (event is VerifyEmailSubmittedEvent) {
-      await _onVerifyEmailSubmitted(event, _emit);
-    }     else if (event is ResendEmailVerificationEvent) {
-      await _onResendEmailVerification(event, _emit);
-    }     else if (event is ForgotPasswordSubmittedEvent) {
-      await _onForgotPasswordSubmitted(event, _emit);
-    }     else if (event is VerifyPasswordResetCodeSubmittedEvent) {
-      await _onVerifyPasswordResetCodeSubmitted(event, _emit);
-    }     else if (event is ResetPasswordSubmittedEvent) {
-      await _onResetPasswordSubmitted(event, _emit);
-    }     else if (event is ChangePasswordSubmittedEvent) {
-      await _onChangePasswordSubmitted(event, _emit);
-    }     else if (event is SignOutEvent) {
-      await _onSignOut(event, _emit);
-    }
-  }
-
-  Future<void> _onCheckAuthStatus(
-    CheckAuthStatusEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> checkAuthStatus() async {
+    state = const AuthLoading();
 
     try {
       final user = await authRepository.getCurrentUser();
 
       if (user == null) {
-        emit(const Unauthenticated());
+        state = const Unauthenticated();
         return;
       }
 
-      emit(
-        Authenticated(
-          user,
-        ),
-      );
+      state = Authenticated(user);
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onSignInSubmitted(
-    SignInSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final user = await authRepository.signInWithEmailPassword(
-        email: event.email,
-        password: event.password,
+        email: email,
+        password: password,
       );
 
-      emit(
-        Authenticated(
-          user,
-        ),
-      );
+      state = Authenticated(user);
     } catch (error) {
       if (error is ServerException &&
           error.code == 'email_verification_required') {
-        final email =
-            error.getString('email') ?? event.email.trim().toLowerCase();
+        final resolvedEmail =
+            error.getString('email') ?? email.trim().toLowerCase();
 
-        emit(
-          EmailVerificationRequired(
-            email: email,
-            message: error.message,
-            emailSent: false,
-          ),
+        state = EmailVerificationRequired(
+          email: resolvedEmail,
+          message: error.message,
+          emailSent: false,
         );
 
         return;
       }
 
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onRegisterSubmitted(
-    RegisterSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> register({
+    required String fullName,
+    required String email,
+    required String phone,
+    required String password,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final result = await authRepository.registerUser(
-        fullName: event.fullName,
-        email: event.email,
-        phone: event.phone,
-        password: event.password,
+        fullName: fullName,
+        email: email,
+        phone: phone,
+        password: password,
       );
 
       if (result.requiresEmailVerification) {
-        emit(
-          EmailVerificationRequired(
-            email: result.email,
-            message: result.message,
-            emailSent: result.emailSent,
-          ),
+        state = EmailVerificationRequired(
+          email: result.email,
+          message: result.message,
+          emailSent: result.emailSent,
         );
 
         return;
       }
 
-      emit(
-        AuthError(
-          result.message,
-        ),
-      );
+      state = AuthError(result.message);
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onVerifyEmailSubmitted(
-    VerifyEmailSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final user = await authRepository.verifyEmail(
-        email: event.email,
-        code: event.code,
+        email: email,
+        code: code,
       );
 
-      emit(
-        Authenticated(
-          user,
-        ),
-      );
+      state = Authenticated(user);
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onResendEmailVerification(
-    ResendEmailVerificationEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> resendEmailVerification({
+    required String email,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final message = await authRepository.resendEmailVerification(
-        email: event.email,
+        email: email,
       );
 
-      emit(
-        EmailVerificationCodeResent(
-          email: event.email,
-          message: message,
-        ),
+      state = EmailVerificationCodeResent(
+        email: email,
+        message: message,
       );
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Forgot Password
-  // ---------------------------------------------------------------------------
-
-  Future<void> _onForgotPasswordSubmitted(
-    ForgotPasswordSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> forgotPassword({
+    required String email,
+  }) async {
+    state = const AuthLoading();
 
     try {
-      final email = event.email.trim().toLowerCase();
+      final trimmedEmail = email.trim().toLowerCase();
 
       final message = await authRepository.forgotPassword(
-        email: email,
+        email: trimmedEmail,
       );
 
-      emit(
-        PasswordResetCodeSent(
-          email: email,
-          message: message,
-        ),
+      state = PasswordResetCodeSent(
+        email: trimmedEmail,
+        message: message,
       );
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onVerifyPasswordResetCodeSubmitted(
-    VerifyPasswordResetCodeSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  }) async {
+    state = const AuthLoading();
 
     try {
-      final email = event.email.trim().toLowerCase();
+      final trimmedEmail = email.trim().toLowerCase();
 
       final resetToken = await authRepository.verifyPasswordResetCode(
-        email: email,
-        code: event.code.trim(),
+        email: trimmedEmail,
+        code: code.trim(),
       );
 
-      emit(
-        PasswordResetCodeVerified(
-          email: email,
-          resetToken: resetToken,
-        ),
+      state = PasswordResetCodeVerified(
+        email: trimmedEmail,
+        resetToken: resetToken,
       );
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onResetPasswordSubmitted(
-    ResetPasswordSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final message = await authRepository.resetPassword(
-        resetToken: event.resetToken,
-        newPassword: event.newPassword,
-        confirmPassword: event.confirmPassword,
+        resetToken: resetToken,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
       );
 
-      emit(
-        PasswordResetSuccess(
-          message: message,
-        ),
+      state = PasswordResetSuccess(
+        message: message,
       );
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Change Password
-  // ---------------------------------------------------------------------------
-
-  Future<void> _onChangePasswordSubmitted(
-    ChangePasswordSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    state = const AuthLoading();
 
     try {
       final message = await authRepository.changePassword(
-        currentPassword: event.currentPassword,
-        newPassword: event.newPassword,
-        confirmPassword: event.confirmPassword,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
       );
 
-      emit(
-        PasswordChangeSuccess(
-          message: message,
-        ),
+      state = PasswordChangeSuccess(
+        message: message,
       );
     } catch (error) {
-      emit(
-        AuthError(
-          _messageFromError(
-            error,
-          ),
-        ),
-      );
+      state = AuthError(_messageFromError(error));
     }
   }
 
-  Future<void> _onSignOut(
-    SignOutEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
+  Future<void> signOut() async {
+    state = const AuthLoading();
 
     try {
       await authRepository.signOut();
     } finally {
-      emit(
-        const Unauthenticated(),
-      );
+      state = const Unauthenticated();
     }
   }
+
+
 
   String _messageFromError(
     Object error,

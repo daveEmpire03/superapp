@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -55,13 +54,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          RegisterSubmittedEvent(
-            fullName: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: _phoneController.text.trim(),
-            password: _passwordController.text,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .register(
+          fullName: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          phone: _phoneController.text.trim(),
+          password: _passwordController.text,
         );
   }
 

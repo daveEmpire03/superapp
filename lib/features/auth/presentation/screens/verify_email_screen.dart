@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
@@ -117,11 +116,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          VerifyEmailSubmittedEvent(
-            email: _email,
-            code: code,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .verifyEmail(
+          email: _email,
+          code: code,
         );
   }
 
@@ -132,10 +131,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     FocusScope.of(context).unfocus();
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          ResendEmailVerificationEvent(
-            email: _email,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .resendEmailVerification(
+          email: _email,
         );
   }
 

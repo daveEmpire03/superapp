@@ -1,11 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/repository_providers.dart';
 import '../../domain/repositories/order_repository.dart';
-import '../bloc/checkout_event.dart';
+import '../../domain/entities/address_entity.dart';
+import '../../domain/entities/store_location_entity.dart';
+import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../bloc/checkout_state.dart';
-
-
-typedef Emitter<T> = void Function(T value);
 
 final checkoutStateProvider = NotifierProvider<CheckoutController, CheckoutState>(
   CheckoutController.new,
@@ -17,100 +16,70 @@ class CheckoutController extends Notifier<CheckoutState> {
   @override
   CheckoutState build() => CheckoutInitial();
 
-  void _emit(CheckoutState value) { state = value; }
-
-  Future<void> add(CheckoutEvent event) async {
-    if (event is LoadCheckoutInitialDataEvent) {
-      await _onLoadInitialData(event, _emit);
-    }     else if (event is SelectDeliveryMethodEvent) {
-      _onSelectDeliveryMethod(event, _emit);
-    }     else if (event is SelectAddressEvent) {
-      _onSelectAddress(event, _emit);
-    }     else if (event is SelectPickupStoreEvent) {
-      _onSelectPickupStore(event, _emit);
-    }     else if (event is SelectPaymentMethodEvent) {
-      _onSelectPaymentMethod(event, _emit);
-    }     else if (event is SubmitPlaceOrderEvent) {
-      await _onSubmitPlaceOrder(event, _emit);
-    }
-  }
-
-  Future<void> _onLoadInitialData(
-    LoadCheckoutInitialDataEvent event,
-    Emitter<CheckoutState> emit,
-  ) async {
-    emit(CheckoutLoading());
+  Future<void> loadInitialData() async {
+    state = CheckoutLoading();
     try {
       final addresses = await orderRepository.getAddresses();
       final stores = await orderRepository.getStoreLocations();
 
-      emit(CheckoutDataLoaded(
+      state = CheckoutDataLoaded(
         addresses: addresses,
         stores: stores,
         selectedAddress: addresses.isNotEmpty ? addresses.first : null,
         selectedStore: stores.isNotEmpty ? stores.first : null,
-      ));
+      );
     } catch (e) {
-      emit(CheckoutError(e.toString()));
+      state = CheckoutError(e.toString());
     }
   }
 
-  void _onSelectDeliveryMethod(
-    SelectDeliveryMethodEvent event,
-    Emitter<CheckoutState> emit,
-  ) {
+  void selectDeliveryMethod(String method) {
     final cur = state;
     if (cur is CheckoutDataLoaded) {
-      emit(cur.copyWith(deliveryMethod: event.method));
+      state = cur.copyWith(deliveryMethod: method);
     }
   }
 
-  void _onSelectAddress(
-    SelectAddressEvent event,
-    Emitter<CheckoutState> emit,
-  ) {
+  void selectAddress(AddressEntity address) {
     final cur = state;
     if (cur is CheckoutDataLoaded) {
-      emit(cur.copyWith(selectedAddress: event.address));
+      state = cur.copyWith(selectedAddress: address);
     }
   }
 
-  void _onSelectPickupStore(
-    SelectPickupStoreEvent event,
-    Emitter<CheckoutState> emit,
-  ) {
+  void selectPickupStore(StoreLocationEntity store) {
     final cur = state;
     if (cur is CheckoutDataLoaded) {
-      emit(cur.copyWith(selectedStore: event.store));
+      state = cur.copyWith(selectedStore: store);
     }
   }
 
-  void _onSelectPaymentMethod(
-    SelectPaymentMethodEvent event,
-    Emitter<CheckoutState> emit,
-  ) {
+  void selectPaymentMethod(String paymentMethod) {
     final cur = state;
     if (cur is CheckoutDataLoaded) {
-      emit(cur.copyWith(selectedPaymentMethod: event.paymentMethod));
+      state = cur.copyWith(selectedPaymentMethod: paymentMethod);
     }
   }
 
-  Future<void> _onSubmitPlaceOrder(
-    SubmitPlaceOrderEvent event,
-    Emitter<CheckoutState> emit,
-  ) async {
+  Future<void> submitPlaceOrder({
+    required List<CartItemEntity> items,
+    required double subtotal,
+    required double discount,
+    required double deliveryFee,
+    required double total,
+  }) async {
     final cur = state;
     if (cur is! CheckoutDataLoaded) return;
 
-    emit(cur.copyWith(isSubmitting: true, errorMessage: null));
+    state = cur.copyWith(isSubmitting: true, errorMessage: null);
 
     try {
       final order = await orderRepository.placeOrder(
-        items: event.items,
-        subtotal: event.subtotal,
-        discount: event.discount,
-        deliveryFee: event.deliveryFee,
-        total: event.total,
+        items: items,
+        subtotal: subtotal,
+        discount: discount,
+        deliveryFee: deliveryFee,
+        total: total,
         deliveryMethod: cur.deliveryMethod,
         deliveryAddress:
             cur.deliveryMethod == 'delivery' ? cur.selectedAddress : null,
@@ -118,13 +87,15 @@ class CheckoutController extends Notifier<CheckoutState> {
         paymentMethod: cur.selectedPaymentMethod,
       );
 
-      emit(cur.copyWith(isSubmitting: false, placedOrder: order));
-      emit(CheckoutOrderPlacedSuccess(order));
+      state = cur.copyWith(isSubmitting: false, placedOrder: order);
+      state = CheckoutOrderPlacedSuccess(order);
     } catch (e) {
-      emit(cur.copyWith(
+      state = cur.copyWith(
         isSubmitting: false,
         errorMessage: 'Failed to process order: ${e.toString()}',
-      ));
+      );
     }
   }
+
+
 }

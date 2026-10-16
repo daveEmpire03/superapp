@@ -7,7 +7,6 @@ import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -27,7 +26,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(authStateProvider.notifier).add(const CheckAuthStatusEvent());
+      ref.read(authStateProvider.notifier).checkAuthStatus();
     });
   }
 

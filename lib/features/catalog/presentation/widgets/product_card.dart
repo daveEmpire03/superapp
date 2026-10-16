@@ -9,7 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
 
 class ProductCard extends StatelessWidget {
@@ -258,19 +257,19 @@ class ProductCard extends StatelessWidget {
                                       InkWell(
                                         onTap: () {
                                           if (quantity <= 1) {
-                                            ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                                                  RemoveFromCartEvent(
-                                                    cartItem.id,
-                                                  ),
+                                            ProviderScope.containerOf(context, listen: false)
+                                                .read(cartStateProvider.notifier)
+                                                .removeFromCart(
+                                                  cartItem.id,
                                                 );
                                             return;
                                           }
 
-                                          ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                                                UpdateCartQuantityEvent(
-                                                  cartItem.id,
-                                                  quantity - 1,
-                                                ),
+                                          ProviderScope.containerOf(context, listen: false)
+                                              .read(cartStateProvider.notifier)
+                                              .updateCartQuantity(
+                                                cartItem.id,
+                                                quantity - 1,
                                               );
                                         },
                                         child: const Padding(
@@ -298,11 +297,11 @@ class ProductCard extends StatelessWidget {
                                       InkWell(
                                         onTap: cartItem.canIncrement
                                             ? () {
-                                                ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                                                      UpdateCartQuantityEvent(
-                                                        cartItem.id,
-                                                        quantity + 1,
-                                                      ),
+                                                ProviderScope.containerOf(context, listen: false)
+                                                    .read(cartStateProvider.notifier)
+                                                    .updateCartQuantity(
+                                                      cartItem.id,
+                                                      quantity + 1,
                                                     );
                                               }
                                             : null,
@@ -330,12 +329,12 @@ class ProductCard extends StatelessWidget {
                             return InkWell(
                               onTap: canAdd
                                   ? () {
-                                      ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                                            AddToCartEvent(
-                                              inventoryId: inventoryId,
-                                              storeId: storeId,
-                                              productName: product.name,
-                                            ),
+                                      ProviderScope.containerOf(context, listen: false)
+                                          .read(cartStateProvider.notifier)
+                                          .addToCart(
+                                            inventoryId: inventoryId,
+                                            storeId: storeId,
+                                            productName: product.name,
                                           );
 
                                       ScaffoldMessenger.of(context)

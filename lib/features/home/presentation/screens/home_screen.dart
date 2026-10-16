@@ -1,7 +1,6 @@
 import 'package:bokku_mart/features/stores/presentation/providers/store_state_provider.dart';
 import 'package:bokku_mart/features/catalog/presentation/providers/product_state_provider.dart';
 import 'package:bokku_mart/core/providers/riverpod_ui.dart';
-import 'package:bokku_mart/features/catalog/presentation/bloc/product_event.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_state.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/category_chip.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/product_card.dart';
@@ -65,10 +64,8 @@ class HomeScreen extends StatelessWidget {
           return;
         }
 
-        productBloc.add(
-          LoadCatalogEvent(
-            storeId: storeId,
-          ),
+        productBloc.loadCatalog(
+          storeId: storeId,
         );
       },
       child: Scaffold(
@@ -96,10 +93,8 @@ class HomeScreen extends StatelessWidget {
 
               final productBloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
-              await productBloc.add(
-                LoadCatalogEvent(
-                  storeId: storeId ?? productBloc.selectedStoreId,
-                ),
+              await productBloc.loadCatalog(
+                storeId: storeId ?? productBloc.selectedStoreId,
               );
             },
             child: CustomScrollView(
@@ -372,10 +367,10 @@ class HomeScreen extends StatelessWidget {
                                     isSelected:
                                         state.selectedCategory == category.id,
                                     onTap: () {
-                                      ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier).add(
-                                            FilterByCategoryEvent(
-                                              category.id,
-                                            ),
+                                      ProviderScope.containerOf(context, listen: false)
+                                          .read(productStateProvider.notifier)
+                                          .filterByCategory(
+                                            category.id,
                                           );
                                     },
                                   );
@@ -514,10 +509,8 @@ class HomeScreen extends StatelessWidget {
                           onRetry: () {
                             final bloc = ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier);
 
-                            bloc.add(
-                              LoadCatalogEvent(
-                                storeId: bloc.selectedStoreId,
-                              ),
+                            bloc.loadCatalog(
+                              storeId: bloc.selectedStoreId,
                             );
                           },
                         ),

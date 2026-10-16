@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -76,9 +75,9 @@ class ProfileScreen extends StatelessWidget {
             return RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
-                ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-                      const CheckAuthStatusEvent(),
-                    );
+                await ProviderScope.containerOf(context, listen: false)
+                    .read(authStateProvider.notifier)
+                    .checkAuthStatus();
               },
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -355,9 +354,9 @@ class ProfileScreen extends StatelessWidget {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          const SignOutEvent(),
-        );
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .signOut();
   }
 }
 

@@ -7,9 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
-import '../../../cart/presentation/bloc/cart_event.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
-import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -23,7 +21,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(LoadCheckoutInitialDataEvent());
+    ProviderScope.containerOf(context, listen: false)
+        .read(checkoutStateProvider.notifier)
+        .loadInitialData();
   }
 
   @override
@@ -33,7 +33,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       listener: (context, state) {
         if (state is CheckoutOrderPlacedSuccess) {
           // Clear cart on successful order placement
-          ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(const ClearCartEvent());
+          ProviderScope.containerOf(context, listen: false)
+              .read(cartStateProvider.notifier)
+              .clearCart();
           context.goNamed(
             RouteNames.orderSuccess,
             extra: state.order,
@@ -100,9 +102,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
-                                            const SelectDeliveryMethodEvent(
-                                                'delivery'));
+                                        ProviderScope.containerOf(context, listen: false)
+                                            .read(checkoutStateProvider.notifier)
+                                            .selectDeliveryMethod('delivery');
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
@@ -155,9 +157,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
-                                            const SelectDeliveryMethodEvent(
-                                                'pickup'));
+                                        ProviderScope.containerOf(context, listen: false)
+                                            .read(checkoutStateProvider.notifier)
+                                            .selectDeliveryMethod('pickup');
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
@@ -253,7 +255,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
                                       ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
-                                          .add(SelectAddressEvent(addr));
+                                          .selectAddress(addr);
                                     },
                                     title: Text(
                                         '${addr.label} • ${addr.fullName}',
@@ -294,7 +296,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     activeColor: AppColors.primary,
                                     onChanged: (_) {
                                       ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
-                                          .add(SelectPickupStoreEvent(store));
+                                          .selectPickupStore(store);
                                     },
                                     title: Text(store.name,
                                         style: const TextStyle(
@@ -333,7 +335,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
                                       ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
-                                          .add(SelectPaymentMethodEvent(val!));
+                                          .selectPaymentMethod(val!);
                                     },
                                     title: const Text(
                                         'Debit / Credit Card (Instant)',
@@ -352,7 +354,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
                                       ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
-                                          .add(SelectPaymentMethodEvent(val!));
+                                          .selectPaymentMethod(val!);
                                     },
                                     title: const Text(
                                         'Direct Bank Transfer (Virtual Account)',
@@ -371,7 +373,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     activeColor: AppColors.primary,
                                     onChanged: (val) {
                                       ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier)
-                                          .add(SelectPaymentMethodEvent(val!));
+                                          .selectPaymentMethod(val!);
                                     },
                                     title: const Text(
                                         'Bokku Mart Wallet (Balance: ₦18,500)',
@@ -436,16 +438,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 onPressed: checkoutState.isSubmitting
                                     ? null
                                     : () {
-                                        ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(
-                                              SubmitPlaceOrderEvent(
-                                                items: cartState.items,
-                                                subtotal: cartState.subtotal,
-                                                discount: 0,
-                                                // Legacy event fields. The backend remains
-                                                // authoritative for delivery fee and final total.
-                                                deliveryFee: 0.0,
-                                                total: basketSubtotal,
-                                              ),
+                                        ProviderScope.containerOf(context, listen: false)
+                                            .read(checkoutStateProvider.notifier)
+                                            .submitPlaceOrder(
+                                              items: cartState.items,
+                                              subtotal: cartState.subtotal,
+                                              discount: 0,
+                                              // Legacy event fields. The backend remains
+                                              // authoritative for delivery fee and final total.
+                                              deliveryFee: 0.0,
+                                              total: basketSubtotal,
                                             );
                                       },
                                 child: checkoutState.isSubmitting

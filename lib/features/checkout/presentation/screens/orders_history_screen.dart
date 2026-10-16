@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 
 class OrdersHistoryScreen extends StatefulWidget {
@@ -20,7 +19,9 @@ class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    ProviderScope.containerOf(context, listen: false).read(checkoutStateProvider.notifier).add(LoadCheckoutInitialDataEvent());
+    ProviderScope.containerOf(context, listen: false)
+        .read(checkoutStateProvider.notifier)
+        .loadInitialData();
   }
 
   @override

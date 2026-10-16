@@ -8,7 +8,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/router/route_names.dart';
 import '../../domain/entities/product_entity.dart';
-import '../../../cart/presentation/bloc/cart_event.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductEntity product;
@@ -422,13 +421,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   child: ElevatedButton(
                     onPressed: canAddToCart
                         ? () {
-                            ProviderScope.containerOf(context, listen: false).read(cartStateProvider.notifier).add(
-                                  AddToCartEvent(
-                                    inventoryId: inventoryId,
-                                    storeId: storeId,
-                                    productName: p.name,
-                                    quantity: _selectedQuantity,
-                                  ),
+                            ProviderScope.containerOf(context, listen: false)
+                                .read(cartStateProvider.notifier)
+                                .addToCart(
+                                  inventoryId: inventoryId,
+                                  storeId: storeId,
+                                  productName: p.name,
+                                  quantity: _selectedQuantity,
                                 );
 
                             ScaffoldMessenger.of(context)

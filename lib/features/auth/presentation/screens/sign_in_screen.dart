@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -43,11 +42,11 @@ class _SignInScreenState extends State<SignInScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          SignInSubmittedEvent(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .signIn(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
   }
 

@@ -6,7 +6,6 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/store_entity.dart';
-import '../bloc/store_event.dart';
 import '../bloc/store_state.dart';
 
 class StoreSelector extends StatelessWidget {
@@ -172,9 +171,7 @@ class _StoreBottomSheetState extends State<_StoreBottomSheet> {
   }
 
   void _findStoresNearMe() {
-    ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
-          const LoadStoresWithLocationEvent(),
-        );
+    ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).loadStoresWithLocation();
   }
 
   void _search(String value) {
@@ -182,17 +179,11 @@ class _StoreBottomSheetState extends State<_StoreBottomSheet> {
     final query = value.trim();
 
     if (query.isEmpty) {
-      bloc.add(
-        const LoadStoresEvent(),
-      );
+      bloc.loadStores();
       return;
     }
 
-    bloc.add(
-      SearchStoresEvent(
-        query: query,
-      ),
-    );
+    bloc.searchStores(query: query);
   }
 
   Future<void> _handleLocationAction(
@@ -643,11 +634,7 @@ class _StoreTile extends StatelessWidget {
               Icons.chevron_right,
             ),
       onTap: () {
-        ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
-              SelectStoreEvent(
-                store.id,
-              ),
-            );
+        ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).selectStore(store.id);
 
         Navigator.of(context).pop();
       },
@@ -682,9 +669,7 @@ class _StoreError extends StatelessWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () {
-                ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).add(
-                      const LoadStoresEvent(),
-                    );
+                ProviderScope.containerOf(context, listen: false).read(storeStateProvider.notifier).loadStores();
               },
               child: const Text(
                 'Try again',

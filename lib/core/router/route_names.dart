@@ -12,6 +12,9 @@ class RouteNames {
   static const String verifyPasswordReset = 'verifyPasswordReset';
   static const String resetPassword = 'resetPassword';
   static const String changePassword = 'changePassword';
+  // Drivers
+  static const String driverLogin = 'driverLogin';
+  static const String driverHome = 'driverHome';
 
   // Shell Tabs
   static const String home = 'home';

@@ -3,7 +3,6 @@ import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
 import '../widgets/product_card.dart';
 
@@ -35,7 +34,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onSearch(String query) {
-    ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier).add(SearchProductsEvent(query));
+    ProviderScope.containerOf(context, listen: false)
+        .read(productStateProvider.notifier)
+        .searchProducts(query);
   }
 
   @override
@@ -58,8 +59,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       icon: const Icon(Icons.clear, size: 18),
                       onPressed: () {
                         _searchController.clear();
-                        ProviderScope.containerOf(context, listen: false).read(productStateProvider.notifier)
-                            .add(const ClearSearchEvent());
+                        ProviderScope.containerOf(context, listen: false)
+                            .read(productStateProvider.notifier)
+                            .clearSearch();
                         setState(() {});
                       },
                     )

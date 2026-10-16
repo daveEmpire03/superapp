@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
-import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class VerifyPasswordResetScreen extends StatefulWidget {
@@ -92,11 +91,11 @@ class _VerifyPasswordResetScreenState extends State<VerifyPasswordResetScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          VerifyPasswordResetCodeSubmittedEvent(
-            email: _email,
-            code: _codeController.text.trim(),
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .verifyPasswordResetCode(
+          email: _email,
+          code: _codeController.text.trim(),
         );
   }
 
@@ -105,10 +104,10 @@ class _VerifyPasswordResetScreenState extends State<VerifyPasswordResetScreen> {
       return;
     }
 
-    ProviderScope.containerOf(context, listen: false).read(authStateProvider.notifier).add(
-          ForgotPasswordSubmittedEvent(
-            email: _email,
-          ),
+    ProviderScope.containerOf(context, listen: false)
+        .read(authStateProvider.notifier)
+        .forgotPassword(
+          email: _email,
         );
   }
 
