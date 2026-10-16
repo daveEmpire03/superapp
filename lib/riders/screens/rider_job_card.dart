@@ -1,4 +1,6 @@
+import 'package:bokku_mart/core/constants/app_colors.dart';
 import 'package:bokku_mart/riders/domain/entities/rider_job_entity.dart';
+import 'package:bokku_mart/riders/screens/rider_status_style.dart';
 import 'package:flutter/material.dart';
 
 class RiderJobCard extends StatelessWidget {
@@ -9,39 +11,84 @@ class RiderJobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = job.status.color;
+
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: AppColors.background,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black12),
-            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Container(width: 4, color: accent),
                   Expanded(
-                    child: Text(
-                      job.orderReference,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  job.orderReference,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              _StatusChip(status: job.status),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _IconRow(
+                            icon: Icons.storefront_outlined,
+                            text: job.storeName,
+                          ),
+                          const SizedBox(height: 6),
+                          _IconRow(
+                            icon: Icons.person_outline_rounded,
+                            text: job.customerName,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: AppColors.textMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _timeAgo(job.createdAt),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: AppColors.textMuted),
+                              ),
+                              const Spacer(),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: AppColors.textMuted,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  _StatusChip(status: job.status),
                 ],
               ),
-              const SizedBox(height: 8),
-              _Row(icon: Icons.storefront_outlined, text: job.storeName),
-              const SizedBox(height: 4),
-              _Row(icon: Icons.person_outline, text: job.customerName),
-            ],
+            ),
           ),
         ),
       ),
@@ -49,21 +96,23 @@ class RiderJobCard extends StatelessWidget {
   }
 }
 
-class _Row extends StatelessWidget {
+class _IconRow extends StatelessWidget {
   final IconData icon;
   final String text;
-  const _Row({required this.icon, required this.text});
+  const _IconRow({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.black54),
+        Icon(icon, size: 16, color: AppColors.textSecondary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text.isEmpty ? '—' : text,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -76,40 +125,32 @@ class _StatusChip extends StatelessWidget {
   final DeliveryStatus status;
   const _StatusChip({required this.status});
 
-  Color get _color {
-    switch (status) {
-      case DeliveryStatus.pending:
-      case DeliveryStatus.assigned:
-        return Colors.blueGrey;
-      case DeliveryStatus.accepted:
-      case DeliveryStatus.pickedUp:
-        return Colors.orange;
-      case DeliveryStatus.outForDelivery:
-        return Colors.blue;
-      case DeliveryStatus.delivered:
-        return Colors.green;
-      case DeliveryStatus.rejected:
-      case DeliveryStatus.cancelled:
-        return Colors.red;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: _color.withValues(alpha: 0.12),
+        color: status.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         status.label,
         style: TextStyle(
-          color: _color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          color: status.color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
+}
+
+String _timeAgo(DateTime dt) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inMinutes < 1) return 'just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+  if (diff.inHours < 24) return '${diff.inHours}h ago';
+  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-'
+      '${dt.day.toString().padLeft(2, '0')}';
 }

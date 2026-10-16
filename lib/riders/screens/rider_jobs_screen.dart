@@ -1,3 +1,4 @@
+import 'package:bokku_mart/core/constants/app_colors.dart';
 import 'package:bokku_mart/riders/presentation/providers/rider_providers.dart';
 import 'package:bokku_mart/riders/screens/rider_job_card.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> {
         title: const Text('My Deliveries'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.read(riderJobsProvider.notifier).refresh(),
           ),
         ],
@@ -32,15 +33,11 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(value: true, label: Text('Active')),
-                ButtonSegment(value: false, label: Text('All')),
-              ],
-              selected: {_showActiveOnly},
-              onSelectionChanged: (s) =>
-                  setState(() => _showActiveOnly = s.first),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            child: _FilterBar(
+              activeOnly: _showActiveOnly,
+              onChanged: (v) => setState(() => _showActiveOnly = v),
+              counts: [active.length, jobsAsync.asData?.value.length ?? 0],
             ),
           ),
           Expanded(
@@ -57,15 +54,12 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> {
 
                   if (jobs.isEmpty) {
                     return ListView(
-                      children: const [
-                        SizedBox(height: 120),
-                        Center(child: Text('No deliveries to show.')),
-                      ],
+                      children: const [SizedBox(height: 80), _JobsEmpty()],
                     );
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                     itemCount: jobs.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, i) {
@@ -86,6 +80,129 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> {
   }
 }
 
+class _FilterBar extends StatelessWidget {
+  final bool activeOnly;
+  final ValueChanged<bool> onChanged;
+  final List<int> counts;
+
+  const _FilterBar({
+    required this.activeOnly,
+    required this.onChanged,
+    required this.counts,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _Pill(
+              label: 'Active · ${counts[0]}',
+              selected: activeOnly,
+              onTap: () => onChanged(true),
+            ),
+          ),
+          Expanded(
+            child: _Pill(
+              label: 'All · ${counts[1]}',
+              selected: !activeOnly,
+              onTap: () => onChanged(false),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _Pill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : AppColors.textSecondary,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JobsEmpty extends StatelessWidget {
+  const _JobsEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: const BoxDecoration(
+                color: AppColors.primarySoft,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.inbox_outlined,
+                color: AppColors.primary,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No deliveries here',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'New assignments will appear automatically.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -99,7 +216,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 40),
+            const Icon(Icons.error_outline, size: 40, color: AppColors.error),
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
