@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../location/location_service.dart';
 import '../network/dio_client.dart';
 import '../storage/auth_token_storage.dart';
+import '../storage/onboarding_storage.dart';
 
 // Auth
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -35,6 +36,19 @@ import '../../features/stores/data/datasources/store_remote_data_source.dart';
 import '../../features/stores/data/repositories/store_repository.dart';
 import '../../features/stores/data/repositories/store_repository_impl.dart';
 
+// Notifications
+import '../../features/notifications/data/datasources/notification_remote_data_source.dart';
+import '../../features/notifications/data/repositories/notification_repository_impl.dart';
+import '../../features/notifications/domain/repositories/notification_repository.dart';
+
+// Orders (Backend Feature)
+import '../../features/orders/data/datasources/order_remote_data_source.dart'
+    as backend_orders_ds;
+import '../../features/orders/data/repositories/order_repository_impl.dart'
+    as backend_orders_repo;
+import '../../features/orders/domain/repositories/order_repository.dart'
+    as backend_orders_domain;
+
 // Rider
 
 final sl = GetIt.instance;
@@ -50,6 +64,10 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton<AuthTokenStorage>(
     () => AuthTokenStorage(secureStorage: sl<FlutterSecureStorage>()),
+  );
+
+  sl.registerLazySingleton<OnboardingStorage>(
+    () => OnboardingStorage(sharedPreferences: sl<SharedPreferences>()),
   );
 
   sl.registerLazySingleton<DioClient>(
@@ -121,5 +139,29 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton<RiderRepository>(
     () => RiderRepositoryImpl(remoteDataSource: sl<RiderRemoteDataSource>()),
+  );
+
+  // Notifications
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(
+      remoteDataSource: sl<NotificationRemoteDataSource>(),
+    ),
+  );
+
+  // Orders (Backend Feature)
+  sl.registerLazySingleton<backend_orders_ds.OrderRemoteDataSource>(
+    () => backend_orders_ds.OrderRemoteDataSourceImpl(
+      dioClient: sl<DioClient>(),
+    ),
+  );
+
+  sl.registerLazySingleton<backend_orders_domain.OrderRepository>(
+    () => backend_orders_repo.OrderRepositoryImpl(
+      remoteDataSource: sl<backend_orders_ds.OrderRemoteDataSource>(),
+    ),
   );
 }

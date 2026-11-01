@@ -3,6 +3,7 @@ import 'package:bokku_mart/features/catalog/presentation/providers/product_state
 import 'package:bokku_mart/core/providers/riverpod_ui.dart';
 import 'package:bokku_mart/features/catalog/presentation/bloc/product_state.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/category_chip.dart';
+import 'package:bokku_mart/features/notifications/presentation/providers/notification_state_provider.dart';
 import 'package:bokku_mart/features/catalog/presentation/widgets/product_card.dart';
 import 'package:bokku_mart/features/stores/presentation/bloc/store_state.dart';
 import 'package:bokku_mart/features/stores/presentation/widgets/store_selector.dart';
@@ -149,17 +150,38 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                tooltip: 'Notifications',
-                                onPressed: () {
-                                  context.pushNamed(
-                                    RouteNames.notifications,
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final unreadCount = ref.watch(
+                                    unreadNotificationCountProvider,
+                                  );
+                                  return IconButton(
+                                    tooltip: 'Notifications',
+                                    onPressed: () {
+                                      context.pushNamed(
+                                        RouteNames.notifications,
+                                      );
+                                    },
+                                    icon: Badge(
+                                      isLabelVisible: unreadCount > 0,
+                                      label: Text(
+                                        unreadCount > 99
+                                            ? '99+'
+                                            : unreadCount.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      backgroundColor: AppColors.primary,
+                                      child: const Icon(
+                                        Icons.notifications_none_rounded,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
                                   );
                                 },
-                                icon: const Icon(
-                                  Icons.notifications_none_rounded,
-                                  color: AppColors.textPrimary,
-                                ),
                               ),
                             ],
                           ),

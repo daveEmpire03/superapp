@@ -42,11 +42,11 @@ import '../../features/checkout/domain/entities/order_entity.dart';
 import '../../features/checkout/presentation/screens/checkout_screen.dart';
 import '../../features/checkout/presentation/screens/order_success_screen.dart';
 import '../../features/checkout/presentation/screens/order_tracking_screen.dart';
-import '../../features/checkout/presentation/screens/orders_history_screen.dart';
+import '../../features/orders/presentation/screens/orders_history_screen.dart';
 
 // Profile
 import '../../features/profile/presentation/screens/deals_screen.dart';
-import '../../features/profile/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/mobility/presentation/screens/mobility_screen.dart';
 import '../../features/mobility/presentation/screens/location_picker_screen.dart';
@@ -128,7 +128,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isPublicPath = _publicPaths.contains(path);
 
       if (authState is Unauthenticated) {
-        if (path == '/') return '/signin';
+        if (path == '/') return null;
         if (isPublicPath) return null;
         return '/signin';
       }
@@ -137,6 +137,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         final role = authState.user.roleEnum;
         final home = _homeForRole(role);
 
+        if (path == '/') return null;
         if (isPublicPath) return home;
         if (!_isAllowed(role, path)) return home;
       }

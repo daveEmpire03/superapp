@@ -6,13 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../core/storage/onboarding_storage.dart';
 import '../bloc/auth_state.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({
-    super.key,
-  });
+  const SplashScreen({super.key});
 
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
@@ -30,18 +30,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     });
   }
 
-  Future<void> _navigate(
-    String routeName,
-  ) async {
+  Future<void> _navigate(String routeName) async {
     if (_hasNavigated) {
       return;
     }
 
     _hasNavigated = true;
 
-    await Future<void>.delayed(
-      const Duration(milliseconds: 650),
-    );
+    await Future<void>.delayed(const Duration(milliseconds: 650));
 
     if (!mounted) {
       return;
@@ -50,13 +46,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     context.goNamed(routeName);
   }
 
+  void _routeUnauthenticated() {
+    final onboardingStorage = sl<OnboardingStorage>();
+    if (!onboardingStorage.hasSeenOnboarding) {
+      _navigate(RouteNames.onboarding);
+    } else {
+      _navigate(RouteNames.signIn);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authStateProvider, (previous, current) {
       if (current is Authenticated) {
         _navigate(RouteNames.home);
       } else if (current is Unauthenticated || current is AuthError) {
-        _navigate(RouteNames.signIn);
+        _routeUnauthenticated();
       }
     });
 
@@ -67,131 +72,123 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             authState is AuthError)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _hasNavigated) return;
-        _navigate(authState is Authenticated ? RouteNames.home : RouteNames.signIn);
+        if (authState is Authenticated) {
+          _navigate(RouteNames.home);
+        } else {
+          _routeUnauthenticated();
+        }
       });
     }
 
     return Scaffold(
-
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryDark,
-                AppColors.primary,
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Stack(
-              children: [
-                const AppFadeIn(
-                  duration: Duration(milliseconds: 500),
-                  child: _BackgroundDecoration(),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const AppScaleIn(
-                          duration: Duration(milliseconds: 380),
-                          beginScale: 0.85,
-                          endScale: 1.0,
-                          curve: Curves.easeOutBack,
-                          child: _LogoContainer(),
-                        ),
-                        const SizedBox(height: 28),
-                        AppSlideIn(
-                          delay: const Duration(milliseconds: 140),
-                          duration: const Duration(milliseconds: 320),
-                          direction: SlideDirection.fromBottom,
-                          distance: 0.12,
-                          curve: Curves.easeOutCubic,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                AppStrings.appName,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  height: 1,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  letterSpacing: -1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Everything you need, closer to you.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  height: 1.5,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(
-                                    alpha: 0.82,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 24,
-                  right: 24,
-                  bottom: 32,
-                  child: AppFadeIn(
-                    delay: const Duration(milliseconds: 280),
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.3,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withValues(
-                                alpha: 0.95,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Shopping made simple',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(
-                              alpha: 0.65,
-                            ),
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.primaryDark, AppColors.primary],
           ),
         ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              const AppFadeIn(
+                duration: Duration(milliseconds: 500),
+                child: _BackgroundDecoration(),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const AppScaleIn(
+                        duration: Duration(milliseconds: 380),
+                        beginScale: 0.85,
+                        endScale: 1.0,
+                        curve: Curves.easeOutBack,
+                        child: _LogoContainer(),
+                      ),
+                      const SizedBox(height: 28),
+                      AppSlideIn(
+                        delay: const Duration(milliseconds: 140),
+                        duration: const Duration(milliseconds: 320),
+                        direction: SlideDirection.fromBottom,
+                        distance: 0.12,
+                        curve: Curves.easeOutCubic,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              AppStrings.appName,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 36,
+                                height: 1,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Everything you need, closer to you.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.82),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 24,
+                right: 24,
+                bottom: 32,
+                child: AppFadeIn(
+                  delay: const Duration(milliseconds: 280),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.3,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white.withValues(alpha: 0.95),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'High-Quality Groceries, Lowest Prices!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.65),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -206,14 +203,10 @@ class _LogoContainer extends StatelessWidget {
       height: 112,
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(
-          alpha: 0.14,
-        ),
+        color: Colors.white.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(34),
         border: Border.all(
-          color: Colors.white.withValues(
-            alpha: 0.18,
-          ),
+          color: Colors.white.withValues(alpha: 0.18),
           width: 1.2,
         ),
       ),
@@ -223,14 +216,9 @@ class _LogoContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(29),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(
-                alpha: 0.16,
-              ),
+              color: Colors.black.withValues(alpha: 0.16),
               blurRadius: 28,
-              offset: const Offset(
-                0,
-                12,
-              ),
+              offset: const Offset(0, 12),
             ),
           ],
         ),
@@ -262,9 +250,7 @@ class _BackgroundDecoration extends StatelessWidget {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(
-                  alpha: 0.05,
-                ),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -277,9 +263,7 @@ class _BackgroundDecoration extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(
-                    alpha: 0.08,
-                  ),
+                  color: Colors.white.withValues(alpha: 0.08),
                   width: 1.5,
                 ),
               ),
@@ -293,9 +277,7 @@ class _BackgroundDecoration extends StatelessWidget {
               height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(
-                  alpha: 0.045,
-                ),
+                color: Colors.white.withValues(alpha: 0.045),
               ),
             ),
           ),

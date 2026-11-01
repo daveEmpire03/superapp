@@ -2,7 +2,7 @@ class AppStrings {
   AppStrings._();
 
   static const String appName = 'Bokku Mart';
-  static const String tagline = 'Nigeria’s Favorite Supermarket';
+  static const String tagline = "Nigeria's FIRST hard discount store";
   static const String currencySymbol = '₦';
 
   // Navigation Labels
@@ -18,7 +18,7 @@ class AppStrings {
   static const String searchHint = 'Search rice, milk, drinks, detergents...';
   static const String topCategories = 'Shop by Category';
   static const String featuredDeals = 'Today’s Hot Deals 🔥';
-  static const String bestSellers = 'Nigerian Pantry Staples';
+  static const String bestSellers = 'Lowest Prices!';
   static const String viewAll = 'View All';
 
   // Errors & Placeholders

@@ -1,10 +1,8 @@
 import 'package:bokku_mart/core/constants/app_colors.dart';
-import 'package:bokku_mart/core/providers/repository_providers.dart';
 import 'package:bokku_mart/features/auth/presentation/bloc/auth_state.dart';
 import 'package:bokku_mart/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class RiderProfileScreen extends ConsumerWidget {
   const RiderProfileScreen({super.key});
@@ -40,8 +38,10 @@ class RiderProfileScreen extends ConsumerWidget {
 
     if (ok != true) return;
 
-    await ref.read(authRepositoryProvider).signOut();
-    if (context.mounted) context.go('/signin');
+    // This clears tokens AND emits Unauthenticated.
+    // The router's refreshListenable fires, redirect runs,
+    // user lands on /signin automatically. No context.go needed.
+    await ref.read(authStateProvider.notifier).signOut();
   }
 
   @override

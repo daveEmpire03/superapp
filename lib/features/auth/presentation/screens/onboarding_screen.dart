@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/animations/animations.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../core/storage/onboarding_storage.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
@@ -53,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _nextPage() async {
     if (_isLastPage) {
-      context.goNamed(RouteNames.home);
+      await _finishOnboarding();
       return;
     }
 
@@ -63,8 +65,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _skipOnboarding() {
-    context.goNamed(RouteNames.home);
+  Future<void> _skipOnboarding() async {
+    await _finishOnboarding();
+  }
+
+  Future<void> _finishOnboarding() async {
+    await sl<OnboardingStorage>().setHasSeenOnboarding(true);
+    if (!mounted) return;
+    context.goNamed(RouteNames.signIn);
   }
 
   @override

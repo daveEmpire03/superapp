@@ -158,6 +158,17 @@ class ApiEndpoints {
   // ---------------------------------------------------------------------------
 
   static const String notifications = 'notifications/';
+  static const String notificationUnreadCount = 'notifications/unread-count/';
+  static const String readAllNotifications = 'notifications/read-all/';
+  static const String notificationDevices = 'notifications/devices/';
+
+  static String markNotificationRead(Object notificationId) {
+    return 'notifications/$notificationId/read/';
+  }
+
+  static String notificationDevice(Object deviceId) {
+    return 'notifications/devices/$deviceId/';
+  }
 
   // ---------------------------------------------------------------------------
   // Reviews

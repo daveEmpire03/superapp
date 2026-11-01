@@ -19,9 +19,12 @@ class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    ProviderScope.containerOf(context, listen: false)
-        .read(checkoutStateProvider.notifier)
-        .loadInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ProviderScope.containerOf(context, listen: false)
+          .read(checkoutStateProvider.notifier)
+          .loadInitialData();
+    });
   }
 
   @override

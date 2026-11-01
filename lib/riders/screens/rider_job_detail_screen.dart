@@ -4,6 +4,7 @@ import 'package:bokku_mart/riders/presentation/providers/rider_providers.dart';
 import 'package:bokku_mart/riders/screens/rider_status_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RiderJobDetailScreen extends ConsumerStatefulWidget {
   final String jobId;
@@ -81,6 +82,43 @@ class _RiderJobDetailScreenState extends ConsumerState<RiderJobDetailScreen> {
     }
   }
 
+  Future<void> _call(String phone) async {
+    if (phone.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Customer phone not available.')),
+      );
+      return;
+    }
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _navigate(DeliveryAddress address) async {
+    if (!address.hasCoordinates) {
+      // No coordinates — fall back to a search by address string.
+      final query = Uri.encodeComponent(address.oneLine);
+      final uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$query',
+      );
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      return;
+    }
+
+    // Preferred: turn-by-turn directions to the pin.
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1'
+      '&destination=${address.latitude},${address.longitude}'
+      '&travelmode=driving',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final jobsAsync = ref.watch(riderJobsProvider);
@@ -100,7 +138,11 @@ class _RiderJobDetailScreenState extends ConsumerState<RiderJobDetailScreen> {
           if (job == null) {
             return const Center(child: Text('Delivery not found.'));
           }
-          return _Body(job: job);
+          return _Body(
+            job: job,
+            onCall: () => _call(job.customerPhone),
+            onNavigate: () => _navigate(job.deliveryAddress),
+          );
         },
       ),
       bottomNavigationBar: job == null
@@ -117,7 +159,14 @@ class _RiderJobDetailScreenState extends ConsumerState<RiderJobDetailScreen> {
 
 class _Body extends StatelessWidget {
   final RiderJobEntity job;
-  const _Body({required this.job});
+  final VoidCallback onCall;
+  final VoidCallback onNavigate;
+
+  const _Body({
+    required this.job,
+    required this.onCall,
+    required this.onNavigate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,18 +175,46 @@ class _Body extends StatelessWidget {
       children: [
         _Hero(job: job),
         const SizedBox(height: 20),
+
+        // Address card with action buttons
+        if (!job.deliveryAddress.isEmpty) ...[
+          _AddressCard(
+            address: job.deliveryAddress,
+            onCall: onCall,
+            onNavigate: onNavigate,
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Payout
+        if (job.payoutAmount > 0) ...[
+          _PayoutCard(amount: job.payoutAmount),
+          const SizedBox(height: 12),
+        ],
+
+        // Items
+        if (job.items.isNotEmpty) ...[
+          _ItemsCard(items: job.items),
+          const SizedBox(height: 12),
+        ],
+
         _InfoCard(
           title: 'Store',
           icon: Icons.storefront_outlined,
           rows: [_Kv('Name', job.storeName)],
         ),
         const SizedBox(height: 12),
+
         _InfoCard(
           title: 'Customer',
           icon: Icons.person_outline_rounded,
-          rows: [_Kv('Name', job.customerName)],
+          rows: [
+            _Kv('Name', job.customerName),
+            if (job.customerPhone.isNotEmpty) _Kv('Phone', job.customerPhone),
+          ],
         ),
         const SizedBox(height: 12),
+
         _InfoCard(
           title: 'Order',
           icon: Icons.receipt_long_outlined,
@@ -146,6 +223,7 @@ class _Body extends StatelessWidget {
             _Kv('Order status', job.orderStatus),
           ],
         ),
+
         if (job.deliveryNote.isNotEmpty) ...[
           const SizedBox(height: 12),
           _InfoCard(
@@ -154,6 +232,7 @@ class _Body extends StatelessWidget {
             rows: [_Kv('Note', job.deliveryNote)],
           ),
         ],
+
         if (job.proofNote.isNotEmpty) ...[
           const SizedBox(height: 12),
           _InfoCard(
@@ -162,12 +241,328 @@ class _Body extends StatelessWidget {
             rows: [_Kv('Proof', job.proofNote)],
           ),
         ],
+
         const SizedBox(height: 12),
         _TimelineCard(history: job.history),
       ],
     );
   }
 }
+
+// -----------------------------------------------------------------------------
+// Address card
+// -----------------------------------------------------------------------------
+
+class _AddressCard extends StatelessWidget {
+  final DeliveryAddress address;
+  final VoidCallback onCall;
+  final VoidCallback onNavigate;
+
+  const _AddressCard({
+    required this.address,
+    required this.onCall,
+    required this.onNavigate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Delivery address',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (address.recipientName.isNotEmpty)
+            Text(
+              address.recipientName,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          if (address.oneLine.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              address.oneLine,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+            ),
+          ],
+          if (address.phone.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              address.phone,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onCall,
+                  icon: const Icon(Icons.phone_outlined, size: 18),
+                  label: const Text('Call'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onNavigate,
+                  icon: const Icon(Icons.navigation_outlined, size: 18),
+                  label: const Text('Navigate'),
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Payout card
+// -----------------------------------------------------------------------------
+
+class _PayoutCard extends StatelessWidget {
+  final double amount;
+  const _PayoutCard({required this.amount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.successSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.payments_outlined,
+              color: AppColors.success,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your payout',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '₦${amount.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Items card
+// -----------------------------------------------------------------------------
+
+class _ItemsCard extends StatelessWidget {
+  final List<RiderOrderItem> items;
+  const _ItemsCard({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final totalUnits = items.fold<int>(0, (sum, item) => sum + item.quantity);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Items to deliver',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$totalUnits ${totalUnits == 1 ? "unit" : "units"}',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (var i = 0; i < items.length; i++) ...[
+            _ItemRow(item: items[i]),
+            if (i < items.length - 1)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Divider(height: 1),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ItemRow extends StatelessWidget {
+  final RiderOrderItem item;
+  const _ItemRow({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '×${item.quantity}',
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.productName,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (item.sku.isNotEmpty)
+                Text(
+                  item.sku,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '₦${item.lineTotal.toStringAsFixed(0)}',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Hero / Info / Timeline / Action bar — same as before
+// -----------------------------------------------------------------------------
 
 class _Hero extends StatelessWidget {
   final RiderJobEntity job;

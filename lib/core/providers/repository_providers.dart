@@ -5,11 +5,13 @@ import '../di/injection_container.dart';
 import '../location/location_service.dart';
 import '../network/dio_client.dart';
 import '../storage/auth_token_storage.dart';
+import '../storage/onboarding_storage.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/catalog/domain/repositories/product_repository.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/checkout/domain/repositories/order_repository.dart';
 import '../../features/stores/data/repositories/store_repository.dart';
+import '../../features/notifications/domain/repositories/notification_repository.dart';
 
 /// Infrastructure and repository providers for Riverpod.
 ///
@@ -18,6 +20,9 @@ import '../../features/stores/data/repositories/store_repository.dart';
 final dioClientProvider = Provider<DioClient>((ref) => sl<DioClient>());
 final authTokenStorageProvider = Provider<AuthTokenStorage>(
   (ref) => sl<AuthTokenStorage>(),
+);
+final onboardingStorageProvider = Provider<OnboardingStorage>(
+  (ref) => sl<OnboardingStorage>(),
 );
 final locationServiceProvider = Provider<LocationService>(
   (ref) => sl<LocationService>(),
@@ -40,4 +45,7 @@ final storeRepositoryProvider = Provider<StoreRepository>(
 );
 final riderRepositoryProvider = Provider<RiderRepository>(
   (ref) => sl<RiderRepository>(),
+);
+final notificationRepositoryProvider = Provider<NotificationRepository>(
+  (ref) => sl<NotificationRepository>(),
 );

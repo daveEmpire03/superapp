@@ -9,6 +9,9 @@ class RiderJobModel extends RiderJobEntity {
     required super.storeId,
     required super.storeName,
     required super.customerName,
+    required super.customerPhone,
+    required super.deliveryAddress,
+    required super.items,
     required super.riderId,
     required super.riderName,
     required super.status,
@@ -20,6 +23,7 @@ class RiderJobModel extends RiderJobEntity {
     required super.cancelledAt,
     required super.deliveryNote,
     required super.proofNote,
+    required super.payoutAmount,
     required super.history,
     required super.createdAt,
     required super.updatedAt,
@@ -34,6 +38,13 @@ class RiderJobModel extends RiderJobEntity {
       storeId: json['store_id']?.toString() ?? '',
       storeName: json['store_name']?.toString() ?? '',
       customerName: json['customer_name']?.toString() ?? '',
+      customerPhone: json['customer_phone']?.toString() ?? '',
+      deliveryAddress: DeliveryAddress.fromJson(
+        json['delivery_address'] is Map
+            ? Map<String, dynamic>.from(json['delivery_address'] as Map)
+            : null,
+      ),
+      items: _parseItems(json['items']),
       riderId: json['rider']?.toString(),
       riderName: json['rider_name']?.toString(),
       status: DeliveryStatus.fromString(json['status']?.toString()),
@@ -45,6 +56,7 @@ class RiderJobModel extends RiderJobEntity {
       cancelledAt: _parseDate(json['cancelled_at']),
       deliveryNote: json['delivery_note']?.toString() ?? '',
       proofNote: json['proof_note']?.toString() ?? '',
+      payoutAmount: _parseDouble(json['payout_amount']),
       history: _parseHistory(json['history']),
       createdAt: _parseDate(json['created_at']) ?? DateTime.now(),
       updatedAt: _parseDate(json['updated_at']) ?? DateTime.now(),
@@ -53,7 +65,6 @@ class RiderJobModel extends RiderJobEntity {
 
   static List<DeliveryHistoryEntry> _parseHistory(dynamic raw) {
     if (raw is! List) return const [];
-
     return raw
         .whereType<Map>()
         .map((e) => _historyEntry(Map<String, dynamic>.from(e)))
@@ -69,6 +80,29 @@ class RiderJobModel extends RiderJobEntity {
       note: json['note']?.toString() ?? '',
       createdAt: _parseDate(json['created_at']) ?? DateTime.now(),
     );
+  }
+
+  static List<RiderOrderItem> _parseItems(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((e) {
+          final map = Map<String, dynamic>.from(e);
+          return RiderOrderItem(
+            productName: map['product_name']?.toString() ?? '',
+            sku: map['sku']?.toString() ?? '',
+            quantity: (map['quantity'] as num?)?.toInt() ?? 0,
+            unitPrice: _parseDouble(map['unit_price']),
+            lineTotal: _parseDouble(map['line_total']),
+          );
+        })
+        .toList(growable: false);
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0;
   }
 
   static DateTime? _parseDate(dynamic value) {
